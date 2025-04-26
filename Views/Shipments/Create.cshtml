@@ -1,0 +1,79 @@
+@model LogisticsRoutePlanner.Models.Shipment
+
+<div class="container my-5">
+    <!-- 標題 -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="display-4 text-dark font-weight-bold">
+                <i class="fas fa-truck-loading mr-3"></i>新增配送任務
+            </h2>
+            <p class="text-muted">請填寫必要的配送任務資料以開始規劃路線</p>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" class="shadow-lg p-4 bg-white rounded">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <!-- 任務名稱 -->
+        <div class="form-group">
+            <label asp-for="ShipmentName" class="font-weight-semibold text-secondary">任務名稱</label>
+            <input asp-for="ShipmentName" class="form-control form-control-lg" placeholder="輸入任務名稱" />
+            <span asp-validation-for="ShipmentName" class="text-danger"></span>
+        </div>
+
+        <!-- 出貨地點 -->
+        <div class="form-group">
+            <label asp-for="OriginAddress" class="font-weight-semibold text-secondary">出貨地點</label>
+            <input asp-for="OriginAddress" class="form-control form-control-lg" placeholder="輸入出貨地點" />
+            <span asp-validation-for="OriginAddress" class="text-danger"></span>
+        </div>
+
+        <!-- 出貨日期 -->
+        <div class="form-group">
+            <label asp-for="ShipmentDate" class="font-weight-semibold text-secondary">出貨日期</label>
+            @* 預設帶入當天日期，可調整 *@
+            <input asp-for="ShipmentDate" type="date" class="form-control form-control-lg" value="@Model.ShipmentDate.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="ShipmentDate" class="text-danger"></span>
+        </div>
+
+        <!-- 內容物 -->
+        <div class="form-group">
+            <label asp-for="ProductInfo" class="font-weight-semibold text-secondary">配送物品描述</label>
+            <input asp-for="ProductInfo" class="form-control form-control-lg" placeholder="輸入配送物品描述" />
+            <span asp-validation-for="ProductInfo" class="text-danger"></span>
+        </div>
+
+        <!-- 提交按鈕 -->
+        <button type="submit" class="btn btn-success btn-lg w-100 mt-4">建立配送任務</button>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function () {
+            var successMessage = '@Html.Raw(TempData["SuccessMessage"])';
+
+            if (successMessage) {
+                Swal.fire({
+                    title: '成功',
+                    text: successMessage,
+                    icon: 'success',
+                    confirmButtonText: '確定'
+                }).then((result) => {
+                    // 當確認按鈕被點擊後，自動跳轉回 Index 頁面
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("Index", "Shipments")'; // 跳轉到 Index 頁面
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+
+
+
+

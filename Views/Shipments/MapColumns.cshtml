@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "資料欄位對應";
+}
+
+<h2>資料欄位對應</h2>
+
+<form method="post" asp-action="ImportExcelConfirmed">
+    <input type="hidden" name="shipmentId" value="@ViewBag.ShipmentId" />
+    <input type="hidden" name="base64" value="@ViewBag.FileContent" />
+
+    <div class="form-group">
+        <label for="addressColumn">地址欄位</label>
+        <select class="form-control" id="addressColumn" name="addressColumn">
+            @foreach (var header in ViewBag.Headers)
+            {
+                <option value="@header">@header</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="nameColumn">客戶名稱欄位</label>
+        <select class="form-control" id="nameColumn" name="nameColumn">
+            @foreach (var header in ViewBag.Headers)
+            {
+                <option value="@header">@header</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="productColumn">商品欄位（可選）</label>
+        <select class="form-control" id="productColumn" name="productColumn">
+            <option value="">不使用</option>
+            @foreach (var header in ViewBag.Headers)
+            {
+                <option value="@header">@header</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="noteColumn">備註欄位（可選）</label>
+        <select class="form-control" id="noteColumn" name="noteColumn">
+            <option value="">不使用</option>
+            @foreach (var header in ViewBag.Headers)
+            {
+                <option value="@header">@header</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">確認匯入</button>
+</form>

@@ -1,0 +1,44 @@
+@* @{
+    ViewData["Title"] = "匯入 Excel";
+}
+
+<h2>匯入 Excel</h2>
+
+<form method="post" enctype="multipart/form-data" asp-action="PreviewExcel">
+    <input type="hidden" name="shipmentId" value="@ViewBag.ShipmentId" />
+    <div class="form-group">
+        <label for="file">選擇檔案</label>
+        <input type="file" class="form-control" id="file" name="file" required />
+    </div>
+    <button type="submit" class="btn btn-success">預覽資料</button>
+</form> *@
+
+
+
+@{
+    ViewData["Title"] = "匯入 Excel";
+}
+
+<h2 class="text-center my-4">匯入 Excel</h2>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header text-center">
+                    <h4>選擇 Excel 檔案進行匯入</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" asp-action="PreviewExcel">
+                        <input type="hidden" name="shipmentId" value="@ViewBag.ShipmentId" />
+                        <div class="form-group">
+                            <label for="file" class="form-label">選擇檔案</label>
+                            <input type="file" class="form-control" id="file" name="file" required />
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block mt-4">預覽資料</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
