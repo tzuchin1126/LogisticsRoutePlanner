@@ -2,295 +2,291 @@
 @using LogisticsRoutePlanner.Models.ViewModels
 @using LogisticsRoutePlanner.Models
 
-@{
-    ViewData["Title"] = "任務詳情";
-    var addDestinationModel = new AddDestinationViewModel { ShipmentId = Model.Id };
-}
+    @{
+        ViewData["Title"] = "任務詳情";
+        var addDestinationModel = new AddDestinationViewModel { ShipmentId = Model.Id };
+    }
 
-<div class="container-fluid py-4">
-    <div class="card shadow border-0 rounded-lg mb-4">
-        <div class="card-header bg-gradient-primary text-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2 class="mb-0">
-                    <i class="fas fa-truck me-2"></i>任務詳情：@Model.ShipmentName
-                </h2>
-            </div>
-        </div>
-        
-        <div class="card-body">
-            <!-- 任務基本資訊 -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <p class="mb-2"><i class="fas fa-map-marker-alt text-primary me-2"></i><strong>出貨地點：</strong>@Model.OriginAddress</p>
-                </div>
-                <div class="col-md-6">
-                    <p class="mb-2"><i class="far fa-clock text-primary me-2"></i><strong>建立時間：</strong>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+    <div class="container-fluid py-4">
+        <div class="card shadow border-0 rounded-lg mb-4">
+            <div class="card-header bg-gradient-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-truck me-2"></i>任務詳情：@Model.ShipmentName
+                    </h2>
                 </div>
             </div>
-            <!-- 系統訊息顯示 -->
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-
-            <!-- 選擇輸入方式 -->
-            <div class="card mb-4 border-0 shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0"><i class="fas fa-keyboard me-2"></i>選擇輸入方式</h5>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <select id="inputMethod" class="form-select" onchange="handleInputMethodChange()"> 
-                            <option value="single">單筆輸入</option>
-                            <option value="excel">Excel批量匯入</option>
-                        </select>
-                    </div>
-
-                    <!-- 單筆輸入 -->
-                    <div id="singleInput" class="input-method mt-3">
-                        <div class="card border-0 bg-light">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary"><i class="fas fa-plus-circle me-2"></i>新增配送地點</h5>
-                                <form asp-action="AddDestination" method="post" id="addDestinationForm">
-                                    <input type="hidden" name="ShipmentId" value="@Model.Id" />
-                                    @Html.AntiForgeryToken()
-                                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">客戶名稱</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                                <input name="CustomerName" class="form-control" required placeholder="請輸入客戶名稱" />
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">地址</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                                <input name="Address" id="Address" class="form-control" required placeholder="請輸入完整地址" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">配送物品</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-box"></i></span>
-                                                <input name="ProductInfo" class="form-control" placeholder="請輸入配送物品資訊" />
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label">備註（可選）</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-sticky-note"></i></span>
-                                                <input name="Note" class="form-control" placeholder="其他需要注意的事項" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-plus-circle me-2"></i>新增地點
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 匯入Excel -->
-                    <div id="excelImport" class="input-method mt-3" style="display:none;">
-                        <div class="card border-0 bg-light">
-                            <div class="card-body text-center py-5">
-                                <h5 class="card-title text-primary mb-4"><i class="fas fa-file-excel me-2"></i>Excel批量匯入</h5>
-                                <p class="text-muted mb-4">透過Excel檔案批量匯入配送地點資料，提高工作效率</p>
-                                <a class="btn btn-success btn-lg" asp-action="ImportExcel" asp-route-id="@Model.Id">
-                                    <i class="fas fa-file-import me-2"></i>匯入Excel
-                                </a>
-                                <p class="mt-3 small text-muted">支援格式：.xlsx, .xls</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 配送地點清單 -->
-            @if (Model.Destinations?.Any() == true)
-            {
-                <div class="card mb-4 border-0 shadow-sm">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>配送地點清單</h5>
-                        <div>
-                            <span class="badge bg-primary">共 @Model.Destinations.Count 個地點</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>客戶名稱</th>
-                                        <th>地址</th>
-                                        <th class="d-none d-md-table-cell">配送物品</th>
-                                        <th class="d-none d-lg-table-cell">備註</th>
-                                        <th class="text-center">狀態</th>
-                                        <th class="text-end">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model.Destinations)
-                                    {
-                                        <tr>
-                                            <td>@item.CustomerName</td>
-                                            <td>
-                                                <span class="d-inline-block text-truncate" style="max-width: 200px;">@item.Address</span>
-                                            </td>
-                                            <td class="d-none d-md-table-cell">
-                                                <span class="d-inline-block text-truncate" style="max-width: 150px;">@item.ProductInfo</span>
-                                            </td>
-                                            <td class="d-none d-lg-table-cell">
-                                                <span class="d-inline-block text-truncate" style="max-width: 150px;">@item.Note</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge @(item.Status == DeliveryStatus.Delivered ? "bg-success" : 
-                                                    item.Status == DeliveryStatus.Skipped ? "bg-warning" : "bg-secondary")">
-                                                    @(item.Status == DeliveryStatus.Delivered ? "已送達" : 
-                                                      item.Status == DeliveryStatus.Skipped ? "已跳過" : "待送達")
-                                                </span>
-                                            </td>
-                                            <td class="text-end">
-                                                <div class="btn-group btn-group-sm">
-                                                    @* <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailModal-@item.Id">
-                                                        <i class="fas fa-info-circle"></i><span class="d-none d-md-inline ms-1">詳情</span>
-                                                    </button> *@
-
-                                                    <button class="btn btn-outline-warning" onclick="showSkipReason(@item.Id)">
-                                                        <i class="fas fa-ban"></i><span class="d-none d-md-inline ms-1">跳過</span>
-                                                    </button>
-                                                    
-                                                    <form asp-action="DeleteDestination" method="post" class="d-inline">
-                                                        <input type="hidden" name="id" value="@item.Id" />
-                                                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('確定要刪除此地點嗎？');">
-                                                            <i class="fas fa-trash-alt"></i><span class="d-none d-md-inline ms-1">刪除</span>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 路線優化 -->
+            
+            <div class="card-body">
+                <!-- 任務基本資訊 -->
                 <div class="row mb-4">
-                    <div class="col-md-8 offset-md-2">
-                        <div class="card border-0 shadow-sm bg-gradient-light text-center">
-                            <div class="card-body py-4">
-                                <h5 class="mb-3"><i class="fas fa-magic me-2"></i>路線優化</h5>
-                                <p class="text-muted mb-4">系統將根據您的配送點自動計算最佳路線，節省時間與燃料成本</p>
-                                <form asp-action="OptimizeRoute" asp-route-id="@Model.Id" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-warning btn-lg">
-                                        <i class="fas fa-magic me-2"></i>自動排序配送路線
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            @* <i class="fas fa-map-marker-alt text-primary me-2"></i> *@
+                            <strong>出貨地點：</strong>@Model.OriginAddress</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            @* <i class="far fa-clock text-primary me-2"></i> *@
+                            <strong>建立時間：</strong>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
                     </div>
                 </div>
 
-                <!-- 當前送貨順序 -->
+                
+                <!-- 系統訊息顯示 -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <!-- 選擇輸入方式 -->
                 <div class="card mb-4 border-0 shadow-sm">
                     <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="fas fa-route me-2"></i>當前送貨順序</h5>
+                        <h5 class="mb-0"><i class="fas fa-keyboard me-2"></i>選擇輸入方式</h5>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 80px;">順序</th>
-                                        <th>客戶與地址</th>
-                                        <th class="d-none d-md-table-cell">備註</th>
-                                        <th class="text-center">狀態</th>
-                                        <th class="text-end">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var d in Model.Destinations.OrderBy(d => d.SortOrder))
-                                    {
-                                        <tr class="@(d.Status == DeliveryStatus.Delivered ? "table-success" : d.Status == DeliveryStatus.Skipped ? "table-warning" : "")">
-                                            <td class="text-center">
-                                                <span class="badge bg-dark rounded-pill">@d.SortOrder</span>
-                                            </td>
-                                            <td>
-                                                <strong>@d.CustomerName</strong>
-                                                <p class="small text-muted mb-0">@d.Address</p>
-                                            </td>
-                                            <td class="d-none d-md-table-cell">
-                                                <small>@(string.IsNullOrEmpty(d.Note) ? "無" : d.Note)</small>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge @(d.Status == DeliveryStatus.Delivered ? "bg-success" : 
-                                                       d.Status == DeliveryStatus.Skipped ? "bg-warning" : "bg-secondary")">
-                                                    @(d.Status == DeliveryStatus.Delivered ? "已送達" : 
-                                                      d.Status == DeliveryStatus.Skipped ? "已跳過" : "待送達")
-                                                </span>
-                                            </td>
-                                            <td class="text-end">
-                                                <form asp-action="UpdateStatus" method="post" class="d-inline-flex gap-1">
-                                                    <input type="hidden" name="id" value="@d.Id" />
-                                                    <button name="status" value="Delivered" class="btn btn-sm @(d.Status == DeliveryStatus.Delivered ? "btn-success" : "btn-outline-success")">
-                                                        <i class="fas fa-check">送達</i>
-                                                    </button>
-                                                    
-                                                    <button name="status" value="Skipped" onclick="showSkipReason(@Model.Id)" class="btn btn-sm @(d.Status == DeliveryStatus.Skipped ? "btn-warning" : "btn-outline-warning")">
-                                                        <i class="fas fa-ban">跳過</i>
-                                                    </button>
+                        <div class="form-group">
+                            <select id="inputMethod" class="form-select" onchange="handleInputMethodChange()"> 
+                                <option value="single">單筆輸入</option>
+                                <option value="excel">Excel批量匯入</option>
+                            </select>
+                        </div>
 
-                                                    <button name="status" value="Pending" class="btn btn-sm @(d.Status == DeliveryStatus.Pending ? "btn-secondary" : "btn-outline-secondary")">
-                                                        <i class="fas fa-undo">待送達</i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                        <!-- 單筆輸入 -->
+                        <div id="singleInput" class="input-method mt-3">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-dark"><i class="fas fa-plus-circle me-2"></i>新增配送地點</h6>
+                                    <form asp-action="AddDestination" method="post" id="addDestinationForm">
+                                        <input type="hidden" name="ShipmentId" value="@Model.Id" />
+                                        @Html.AntiForgeryToken()
+                                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">客戶名稱</label>
+                                                <div class="input-group">
+                                                    <input name="CustomerName" class="form-control" required placeholder="請輸入客戶名稱" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">地址</label>
+                                                <div class="input-group">
+                                                    <input name="Address" id="Address" class="form-control" required placeholder="請輸入完整地址" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">配送物品</label>
+                                                <div class="input-group">
+                                                    <input name="ProductInfo" class="form-control" placeholder="請輸入配送物品資訊" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">備註（可選）</label>
+                                                <div class="input-group">
+                                                    <input name="Note" class="form-control" placeholder="其他需要注意的事項" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <button type="submit" class="btn btn-success"><i class="fas fa-plus-circle me-2"></i>新增地點</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 匯入Excel -->
+                        <div id="excelImport" class="input-method mt-3" style="display:none;">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center py-5">
+                                    <h5 class="card-title text-primary mb-4"><i class="fas fa-file-excel me-2"></i>Excel批量匯入</h5>
+                                    <p class="text-muted mb-4">透過Excel檔案批量匯入配送地點資料，提高工作效率</p>
+                                    <a class="btn btn-success btn-lg" asp-action="ImportExcel" asp-route-id="@Model.Id">
+                                        <i class="fas fa-file-import me-2"></i>匯入Excel
+                                    </a>
+                                    <p class="mt-3 small text-muted">支援格式：.xlsx, .xls</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            }
-            else
-            {
-                <div class="alert alert-info">
-                    <div class="text-center py-5">
-                        <i class="fas fa-info-circle fa-3x mb-3"></i>
-                        <h4>尚無配送資料</h4>
-                        <p>請先新增配送地點，或匯入Excel數據</p>
+
+                <!-- 配送地點清單 -->
+                @if (Model.Destinations?.Any() == true)
+                {
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>配送地點清單</h5>
+                            <div>
+                                <span class="badge bg-primary">共 @Model.Destinations.Count 個地點</span>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>客戶名稱</th>
+                                            <th>地址</th>
+                                            <th class="d-none d-md-table-cell">配送物品</th>
+                                            <th class="d-none d-lg-table-cell">備註</th>
+                                            <th class="text-center">狀態</th>
+                                            <th class="text-end">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Destinations)
+                                        {
+                                            <tr>
+                                                <td>@item.CustomerName</td>
+                                                <td>
+                                                    <span class="d-inline-block text-truncate" style="max-width: 200px;">@item.Address</span>
+                                                </td>
+                                                <td class="d-none d-md-table-cell">
+                                                    <span class="d-inline-block text-truncate" style="max-width: 150px;">@item.ProductInfo</span>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell">
+                                                    <span class="d-inline-block text-truncate" style="max-width: 150px;">@item.Note</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge @(item.Status == DeliveryStatus.Delivered ? "bg-success" : 
+                                                        item.Status == DeliveryStatus.Skipped ? "bg-warning" : "bg-secondary")">
+                                                        @(item.Status == DeliveryStatus.Delivered ? "已送達" : 
+                                                        item.Status == DeliveryStatus.Skipped ? "已跳過" : "待送達")
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-warning" onclick="showSkipReason(@item.Id)">
+                                                            <i class="fas fa-ban"></i><span class="d-none d-md-inline ms-1">跳過</span>
+                                                        </button>
+                                                        
+                                                        <form asp-action="DeleteDestination" method="post" class="d-inline">
+                                                            <input type="hidden" name="id" value="@item.Id" />
+                                                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('確定要刪除此地點嗎？');">
+                                                                <i class="fas fa-trash-alt"></i><span class="d-none d-md-inline ms-1">刪除</span>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            }
+
+                    <!-- 路線優化 -->
+                    <div class="row mb-4">
+                        <div class="col-md-8 offset-md-2">
+                            <div class="card border-0 shadow-sm bg-gradient-light text-center">
+                                <div class="card-body py-4">
+                                    <h5 class="mb-3"><i class="fas fa-magic me-2"></i>路線優化</h5>
+                                    <p class="text-muted mb-4">系統將根據您的配送點自動計算最佳路線，節省時間與燃料成本</p>
+                                    <form asp-action="OptimizeRoute" asp-route-id="@Model.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-warning btn-lg">
+                                            <i class="fas fa-magic me-2"></i>自動排序配送路線
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 當前送貨順序 -->
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-route me-2"></i>當前送貨順序</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">順序</th>
+                                            <th>客戶與地址</th>
+                                            <th class="d-none d-md-table-cell">備註</th>
+                                            <th class="text-center">狀態</th>
+                                            <th class="text-end">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var d in Model.Destinations.OrderBy(d => d.SortOrder))
+                                        {
+                                            <tr class="@(d.Status == DeliveryStatus.Delivered ? "table-success" : d.Status == DeliveryStatus.Skipped ? "table-warning" : "")">
+                                                <td class="text-center">
+                                                    <span class="badge bg-dark rounded-pill">@d.SortOrder</span>
+                                                </td>
+                                                <td>
+                                                    <strong>@d.CustomerName</strong>
+                                                    <p class="small text-muted mb-0">@d.Address</p>
+                                                </td>
+                                                <td class="d-none d-md-table-cell">
+                                                    <small>@(string.IsNullOrEmpty(d.Note) ? "無" : d.Note)</small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge @(d.Status == DeliveryStatus.Delivered ? "bg-success" : 
+                                                        d.Status == DeliveryStatus.Skipped ? "bg-warning" : "bg-secondary")">
+                                                        @(d.Status == DeliveryStatus.Delivered ? "已送達" : 
+                                                        d.Status == DeliveryStatus.Skipped ? "已跳過" : "待送達")
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <form asp-action="UpdateStatus" method="post" class="d-inline-flex gap-1">
+                                                        <input type="hidden" name="id" value="@d.Id" />
+                                                        <button name="status" value="Delivered" class="btn btn-sm @(d.Status == DeliveryStatus.Delivered ? "btn-success" : "btn-outline-success")">
+                                                            <i class="fas fa-check">送達</i>
+                                                        </button>
+                                                        
+                                                        <button name="status" value="Skipped" onclick="showSkipReason(@Model.Id)" class="btn btn-sm @(d.Status == DeliveryStatus.Skipped ? "btn-warning" : "btn-outline-warning")">
+                                                            <i class="fas fa-ban">跳過</i>
+                                                        </button>
+
+                                                        <button name="status" value="Pending" class="btn btn-sm @(d.Status == DeliveryStatus.Pending ? "btn-secondary" : "btn-outline-secondary")">
+                                                            <i class="fas fa-undo">待送達</i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <div class="text-center py-5">
+                            <i class="fas fa-info-circle fa-3x mb-3"></i>
+                            <h4>尚無配送資料</h4>
+                            <p>請先新增配送地點，或匯入Excel數據</p>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
-</div>
 
 <!-- 跳過原因彈框 -->
 <div id="skipReasonModal" class="modal fade" tabindex="-1" aria-labelledby="skipReasonModalLabel" aria-hidden="true">
@@ -334,10 +330,7 @@
             background-color: #f8f9fa;
         }
         
-        /* 卡片陰影效果 */
-        .card {
-            transition: all 0.3s ease;
-        }
+
         
         .card:hover {
             box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
@@ -360,8 +353,9 @@
         
         /* 背景漸層 */
         .bg-gradient-primary {
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: linear-gradient(45deg, #37383a, #37383a);
         }
+        
         
         .bg-gradient-light {
             background: linear-gradient(45deg, #f8f9fa, #e9ecef);

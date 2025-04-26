@@ -7,18 +7,14 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LogisticsRoutePlanner.styles.css" asp-append-version="true" />
-    
+
     <!-- 引入 SweetAlert2 的 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.20/dist/sweetalert2.min.css" rel="stylesheet">
-    
-    <!-- 引入 SweetAlert2 的 JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.20/dist/sweetalert2.min.js"></script>
     
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-
-    
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container-fluid">
@@ -43,24 +39,16 @@
         </div>
     </nav>
 </header>
-
-
-
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-
     <footer class="border-top footer text-muted">
         <div class="container">
             © 2025 運輸系統，保留所有權利 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Priv聯絡我們：support@logistics.comacy</a>
         </div>
     </footer>
-
-
-
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -116,3 +116,4 @@
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.pdb
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.genruntimeconfig.cache
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/ref/LogisticsRoutePlanner.dll
+/Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.sourcelink.json
