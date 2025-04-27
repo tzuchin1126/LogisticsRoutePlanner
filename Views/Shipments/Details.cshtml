@@ -176,20 +176,17 @@
                                                             item.Status == DeliveryStatus.Skipped ? "已跳過" : "待送達")
                                                         </span>
                                                     </td>
-                                                    <td class="text-end">
-                                                        <div class="btn-group btn-group-sm text-end">
-                                                            <!-- 跳過按鈕，加上背景顏色 -->
-                                                            <button class="btn btn-primary" onclick="showSkipReason(@item.Id)">
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <!-- 跳過按鈕 - 調整為與其他跳過按鈕一致的風格 -->
+                                                            <button class="btn btn-sm @(item.Status == DeliveryStatus.Skipped ? "btn-warning" : "btn-outline-warning") rounded-3 px-2 py-1" onclick="showSkipReason(@item.Id)" title="跳過">
                                                                 <i class="fas fa-ban"></i><span class="d-none d-md-inline ms-1">跳過</span>
                                                             </button>
                                                             
-                                                            <!-- 空格 -->
-                                                            <span class="mx-2"></span>
-
-                                                            <!-- 刪除按鈕，紅色背景 -->
+                                                            <!-- 刪除按鈕 - 保持一致風格 -->
                                                             <form asp-action="DeleteDestination" method="post" class="d-inline">
                                                                 <input type="hidden" name="id" value="@item.Id" />
-                                                                <button type="submit" class="btn btn-danger" onclick="return confirm('確定要刪除此地點嗎？');">
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 px-2 py-1" onclick="return confirm('確定要刪除此地點嗎？');" title="刪除">
                                                                     <i class="fas fa-trash-alt"></i><span class="d-none d-md-inline ms-1">刪除</span>
                                                                 </button>
                                                             </form>
@@ -230,7 +227,7 @@
                                     <table class="table table-hover table-striped">
                                         <thead>
                                             <tr>
-                                                @* <th style="width: 80px;">順序</th> *@
+                                                <th style="width: 80px;">順序</th>
                                                 <th>客戶與地址</th>
                                                 <th class="d-none d-md-table-cell">備註</th>
                                                 <th class="text-center">狀態</th>
@@ -238,13 +235,12 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @* @foreach (var d in Model.Destinations.OrderBy(d => d.SortOrder)) *@
-                                            @foreach (var d in Model.Destinations.OrderBy(d => d.SortOrder).ThenBy(d => d.CustomerName)) // 根據客戶名稱次序進行排序
+                                            @foreach (var d in Model.Destinations.OrderBy(d => d.SortOrder))
                                             {
                                                 <tr class="@(d.Status == DeliveryStatus.Delivered ? "table-success" : d.Status == DeliveryStatus.Skipped ? "table-warning" : "")">
-                                                    @* <td class="text-center">
+                                                    <td class="text-center">
                                                         <span class="badge bg-dark rounded-pill">@d.SortOrder</span>
-                                                    </td> *@
+                                                    </td>
                                                     <td>
                                                         <strong>@d.CustomerName</strong>
                                                         <p class="small text-muted mb-0">@d.Address</p>
@@ -263,30 +259,28 @@
                                                         <form asp-action="UpdateStatus" method="post" class="d-inline-flex gap-2">
                                                             <input type="hidden" name="id" value="@d.Id" />
 
-                                                            <!-- 送達按鈕 -->
+                                                            <!-- 送達按鈕 - 使用綠色系表示成功 -->
                                                             <button name="status" value="Delivered" class="btn btn-sm 
-                                                                    @(d.Status == DeliveryStatus.Delivered ? "btn-primary" : "btn-outline-primary") 
+                                                                    @(d.Status == DeliveryStatus.Delivered ? "btn-success" : "btn-outline-success") 
                                                                     rounded-3 px-2 py-1">
                                                                 <i class="fas fa-check"></i> 送達
                                                             </button>
 
-                                                            <!-- 跳過按鈕 -->
+                                                            <!-- 跳過按鈕 - 保留紅色系表示警告 -->
                                                             <button name="status" value="Skipped" onclick="showSkipReason(@Model.Id)" class="btn btn-sm 
                                                                     @(d.Status == DeliveryStatus.Skipped ? "btn-danger" : "btn-outline-danger") 
                                                                     rounded-3 px-2 py-1">
                                                                 <i class="fas fa-ban"></i> 跳過
                                                             </button>
 
-                                                            <!-- 待送達按鈕 -->
+                                                            <!-- 待送達按鈕 - 使用黃色系表示等待 -->
                                                             <button name="status" value="Pending" class="btn btn-sm 
-                                                                    @(d.Status == DeliveryStatus.Pending ? "btn-secondary" : "btn-outline-secondary") 
+                                                                    @(d.Status == DeliveryStatus.Pending ? "btn-warning" : "btn-outline-warning") 
                                                                     rounded-3 px-2 py-1">
                                                                 <i class="fas fa-undo"></i> 待送達
                                                             </button>
                                                         </form>
                                                     </td>
-
-
                                                 </tr>
                                             }
                                         </tbody>
