@@ -13,51 +13,6 @@ public class ReportsController : Controller
         _context = context;
     }
 
-    // public async Task<IActionResult> Index(string month, int page = 1)
-    // {
-    //     DateTime startDate, endDate;
-    //     int pageSize = 10;  // 每頁顯示的資料筆數
-
-    //     // 如果沒有傳遞 month 參數，設置為當前月份
-    //     if (string.IsNullOrEmpty(month))
-    //     {
-    //         month = DateTime.Now.ToString("yyyy-MM");
-    //     }
-
-    //     // 轉換月份為日期範圍
-    //     if (DateTime.TryParse($"{month}-01", out startDate))
-    //     {
-    //         endDate = startDate.AddMonths(1);
-
-    //         // 查詢總筆數（不分頁用）
-    //         var totalShipments = await _context.Shipments
-    //             .Where(s => s.ShipmentDate >= startDate && s.ShipmentDate < endDate)
-    //             .CountAsync();
-
-    //         // 計算分頁資訊
-    //         var totalPages = (int)Math.Ceiling(totalShipments / (double)pageSize);
-
-    //         // 取得當頁資料
-    //         var shipments = await _context.Shipments
-    //             .Where(s => s.ShipmentDate >= startDate && s.ShipmentDate < endDate)
-    //             .Include(s => s.Destinations)
-    //             .OrderBy(s => s.ShipmentDate) // 你可以依需求排序
-    //             .Skip((page - 1) * pageSize)
-    //             .Take(pageSize)
-    //             .ToListAsync();
-
-    //         // 傳送分頁與月份資料給 View
-    //         ViewData["TotalPages"] = totalPages;
-    //         ViewData["CurrentPage"] = page;
-    //         ViewData["Month"] = month;
-    //         ViewData["TotalRecords"] = totalShipments;
-
-    //         return View(shipments);
-    //     }
-
-    //     // 解析月份失敗時，回傳空結果
-    //     return View(new List<Shipment>());
-    // }
 
     public async Task<IActionResult> Index(string month, string status, string customer, int page = 1)
     {
@@ -104,10 +59,6 @@ public class ReportsController : Controller
 
         return View(shipments);
     }
-
-
-
-
 
 
     // 匯出excel功能
@@ -179,4 +130,5 @@ public class ReportsController : Controller
     }
 
 
+    
 }

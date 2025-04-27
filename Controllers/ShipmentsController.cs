@@ -411,29 +411,43 @@ namespace LogisticsRoutePlanner.Controllers
         /// 預覽 Excel 檔案
         /// 這個方法會讀取上傳的 Excel 檔案，並將第一行的標題列出來供使用者選擇對應的欄位。
         [HttpPost]
-        // public async Task<IActionResult> PreviewExcel(int shipmentId, IFormFile file)
         public async Task<IActionResult> PreviewExcel(int shipmentId, IFormFile file, string productInfo, string note)
         {
             if (file == null || file.Length == 0)
-                return BadRequest("請選擇檔案");
-
-            using var stream = new MemoryStream();
-            await file.CopyToAsync(stream);
-            using var package = new OfficeOpenXml.ExcelPackage(stream);
-            var sheet = package.Workbook.Worksheets.First();
-            
-            var headers = new List<string>();
-            for (int col = 1; col <= sheet.Dimension.Columns; col++)
             {
-                headers.Add(sheet.Cells[1, col].Text.Trim());
+                TempData["Error"] = "請選擇檔案";
+                return RedirectToAction(nameof(ImportExcel), new { id = shipmentId });
             }
 
-            ViewBag.Headers = headers;
-            ViewBag.ShipmentId = shipmentId;
-            ViewBag.FileContent = Convert.ToBase64String(stream.ToArray());
+            try
+            {
+                using var stream = new MemoryStream();
+                await file.CopyToAsync(stream);
+                using var package = new OfficeOpenXml.ExcelPackage(stream);
+                var sheet = package.Workbook.Worksheets.First();
 
-            return View("MapColumns");
+                // 取得標題列
+                var headers = new List<string>();
+                for (int col = 1; col <= sheet.Dimension.Columns; col++)
+                {
+                    string cellValue = sheet.Cells[1, col].Text.Trim();
+                    Console.WriteLine($"Column {col}: {cellValue}");
+                    headers.Add(sheet.Cells[1, col].Text.Trim());
+                }
+
+                ViewBag.Headers = headers;
+                ViewBag.ShipmentId = shipmentId;
+                ViewBag.FileContent = Convert.ToBase64String(stream.ToArray());
+
+                return View("MapColumns");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"檔案解析錯誤: {ex.Message}";
+                return RedirectToAction(nameof(ImportExcel), new { id = shipmentId });
+            }
         }
+
 
 
         /// 確認匯入 Excel 檔案

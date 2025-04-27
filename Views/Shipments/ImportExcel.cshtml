@@ -1,44 +1,65 @@
-@* @{
-    ViewData["Title"] = "匯入 Excel";
-}
-
-<h2>匯入 Excel</h2>
-
-<form method="post" enctype="multipart/form-data" asp-action="PreviewExcel">
-    <input type="hidden" name="shipmentId" value="@ViewBag.ShipmentId" />
-    <div class="form-group">
-        <label for="file">選擇檔案</label>
-        <input type="file" class="form-control" id="file" name="file" required />
-    </div>
-    <button type="submit" class="btn btn-success">預覽資料</button>
-</form> *@
-
-
-
 @{
     ViewData["Title"] = "匯入 Excel";
 }
 
-<h2 class="text-center my-4">匯入 Excel</h2>
+<div class="container-fluid py-3">
+    <div class="row align-items-center mb-3">
+        <div class="col">
+            <h4 class="text-dark fw-bold m-0">匯入 Excel</h4>
+        </div>
+        <div class="col-auto">
+            <a class="btn btn-sm btn-secondary" asp-action="Index">
+                <i class="fas fa-arrow-left me-1"></i> 返回列表
+            </a>
+        </div>
+    </div>
 
-<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow-lg">
-                <div class="card-header text-center">
-                    <h4>選擇 Excel 檔案進行匯入</h4>
-                </div>
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" asp-action="PreviewExcel">
+                    <form id="uploadForm" method="post" enctype="multipart/form-data" asp-action="PreviewExcel">
                         <input type="hidden" name="shipmentId" value="@ViewBag.ShipmentId" />
-                        <div class="form-group">
-                            <label for="file" class="form-label">選擇檔案</label>
+
+                        <div class="mb-3">
+                            <label for="file" class="form-label">選擇 Excel 檔案</label>
                             <input type="file" class="form-control" id="file" name="file" required />
+                            <small class="text-muted">僅支援 .xlsx 或 .xls 格式</small>
                         </div>
-                        <button type="submit" class="btn btn-success btn-block mt-4">預覽資料</button>
+
+                        <button type="submit" class="btn btn-sm btn-success w-100 mt-3">
+                            <i class="fas fa-file-import me-1"></i> 預覽資料
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", function (e) {
+            const fileInput = document.getElementById("file");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                e.preventDefault();
+                Swal.fire("錯誤", "請選擇檔案", "warning");
+                return;
+            }
+
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: '檔案格式錯誤',
+                    text: '請上傳副檔名為 .xlsx 或 .xls 的 Excel 檔案'
+                });
+            }
+        });
+    </script>
+}
