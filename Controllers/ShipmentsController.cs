@@ -172,24 +172,45 @@ namespace LogisticsRoutePlanner.Controllers
             }
         }
 
-        /// 刪除配送目的地
+        // 刪除配送目的地
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteDestination(int id)
         {
-            var destination = _context.ShipmentDestinations.Find(id);
-            if (destination != null)
+            try
             {
+                var destination = _context.ShipmentDestinations.Find(id);
+                if (destination == null)
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = $"找不到ID為 {id} 的地點" // 增加ID資訊方便除錯
+                    });
+                }
+
                 _context.ShipmentDestinations.Remove(destination);
                 _context.SaveChanges();
-                TempData["SuccessMessage"] = "地點已成功刪除";
+                
+                return Json(new { 
+                    success = true,
+                    deletedId = id // 返回被刪除的ID
+                });
             }
-            else
+            catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "找不到該地點";
+                return Json(new { 
+                    success = false, 
+                    message = $"刪除失敗: {ex.Message}" 
+                });
             }
-            return RedirectToAction("Details", new { id = destination?.ShipmentId });
         }
+
+
+
+
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -499,7 +520,7 @@ namespace LogisticsRoutePlanner.Controllers
 
         
 
-
+        
 
 
     }

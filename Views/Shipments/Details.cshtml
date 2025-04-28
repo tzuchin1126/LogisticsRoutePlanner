@@ -7,277 +7,215 @@
         var addDestinationModel = new AddDestinationViewModel { ShipmentId = Model.Id };
     }
 
-    <div class="container-fluid py-4">
-        <div class="card shadow border-0 rounded-lg mb-4">
-            <div class="card-header bg-gradient-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">
-                        <i class="fas fa-truck me-2"></i>任務詳情：@Model.ShipmentName
-                    </h2>
+
+
+
+<div class="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">載入中...</span>
+    </div>
+</div>
+
+<div class="container-fluid py-4">
+    <!-- 步驟指示器 -->
+    <div class="card shadow border-0 rounded-lg mb-4">
+        <div class="card-header bg-gradient-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">
+                    <i class="fas fa-truck me-2"></i>任務詳情：@Model.ShipmentName
+                </h2>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <!-- 步驟進度條 -->
+            <div class="steps-progress mb-5">
+                <div class="steps">
+                    <div class="step active" data-step="1">
+                        <div class="step-icon"><i class="fas fa-keyboard"></i></div>
+                        <div class="step-label">選擇輸入方式</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-icon"><i class="fas fa-map-marked-alt"></i></div>
+                        <div class="step-label">輸入配送地點</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-icon"><i class="fas fa-route"></i></div>
+                        <div class="step-label">路線優化</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-icon"><i class="fas fa-truck-loading"></i></div>
+                        <div class="step-label">開始配送</div>
+                    </div>
                 </div>
             </div>
             
-            <div class="card-body">
-                <!-- 任務基本資訊 -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <p class="mb-2">
-                            @* <i class="fas fa-map-marker-alt text-primary me-2"></i> *@
-                            <strong>出貨地點：</strong>@Model.OriginAddress</p>
+            <!-- 系統訊息顯示 -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            
+            <!-- 步驟1：選擇輸入方式 -->
+            <div id="step1" class="step-content active">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-keyboard me-2"></i>步驟1：選擇輸入方式</h5>
                     </div>
-                    <div class="col-md-6">
-                        <p class="mb-2">
-                            @* <i class="far fa-clock text-primary me-2"></i> *@
-                            <strong>建立時間：</strong>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+                    <div class="card-body text-center py-5">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 border-0 shadow-sm hover-effect" onclick="selectInputMethod('single')">
+                                    <div class="card-body">
+                                        <i class="fas fa-plus-circle fa-4x text-primary mb-3"></i>
+                                        <h4>單筆輸入</h4>
+                                        <p class="text-muted">手動輸入每一筆配送地點資訊</p>
+                                        <button class="btn btn-outline-primary">選擇此方式</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 border-0 shadow-sm hover-effect" onclick="selectInputMethod('excel')">
+                                    <div class="card-body">
+                                        <i class="fas fa-file-excel fa-4x text-success mb-3"></i>
+                                        <h4>Excel批量匯入</h4>
+                                        <p class="text-muted">透過Excel檔案批量匯入配送地點</p>
+                                        <button class="btn btn-outline-success">選擇此方式</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                
-                <!-- 系統訊息顯示 -->
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                }
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                }
-
-                <!-- 選擇輸入方式 -->
-                <div class="card mb-4 border-0 shadow-sm">
+            </div>
+            
+            <!-- 步驟2：輸入配送地點 -->
+            <div id="step2" class="step-content" style="display:none;">
+                <div class="card border-0 shadow-sm">
                     <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="fas fa-keyboard me-2"></i>選擇輸入方式</h5>
+                        <h5 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i>步驟2：輸入配送地點</h5>
                     </div>
                     <div class="card-body">
-                        <div class="form-group">
-                            <select id="inputMethod" class="form-select" onchange="handleInputMethodChange()"> 
-                                <option value="single">單筆輸入</option>
-                                <option value="excel">Excel批量匯入</option>
-                            </select>
-                        </div>
-
-                        <!-- 單筆輸入 -->
-                        <div id="singleInput" class="input-method mt-3">
-                            <div class="card border-0 bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title text-dark"><i class="fas fa-plus-circle me-2"></i>新增配送地點</h6>
-                                    <form asp-action="AddDestination" method="post" id="addDestinationForm">
-                                        <input type="hidden" name="ShipmentId" value="@Model.Id" />
-                                        @Html.AntiForgeryToken()
-                                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">客戶名稱</label>
-                                                <div class="input-group">
-                                                    <input name="CustomerName" class="form-control" required placeholder="請輸入客戶名稱" />
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">地址</label>
-                                                <div class="input-group">
-                                                    <input name="Address" id="Address" class="form-control" required placeholder="請輸入完整地址" />
-                                                </div>
-                                            </div>
+                        <!-- 單筆輸入表單 (預設隱藏) -->
+                        <div id="singleInputForm" style="display:none;">
+                            <form asp-action="AddDestination" method="post" id="addDestinationForm">
+                                <input type="hidden" name="ShipmentId" value="@Model.Id" />
+                                @Html.AntiForgeryToken()
+                                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">客戶名稱</label>
+                                        <div class="input-group">
+                                            <input name="CustomerName" class="form-control" required placeholder="請輸入客戶名稱" />
                                         </div>
+                                    </div>
 
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">配送物品</label>
-                                                <div class="input-group">
-                                                    <input name="ProductInfo" class="form-control" placeholder="請輸入配送物品資訊" />
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">備註（可選）</label>
-                                                <div class="input-group">
-                                                    <input name="Note" class="form-control" placeholder="其他需要注意的事項" />
-                                                </div>
-                                            </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">地址</label>
+                                        <div class="input-group">
+                                            <input name="Address" id="Address" class="form-control" required placeholder="請輸入完整地址" />
                                         </div>
-
-                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                            <button type="submit" class="btn btn-success"><i class="fas fa-plus-circle me-2"></i>新增地點</button>
-                                        </div>
-                                    </form>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- 匯入Excel -->
-                        <div id="excelImport" class="input-method mt-3" style="display:none;">
-                            <div class="card border-0 bg-light">
-                                <div class="card-body text-center py-5">
-                                    <h5 class="card-title text-primary mb-4"><i class="fas fa-file-excel me-2"></i>Excel批量匯入</h5>
-                                    <p class="text-muted mb-4">透過Excel檔案批量匯入配送地點資料，提高工作效率</p>
-                                    <a class="btn btn-success btn-lg" asp-action="ImportExcel" asp-route-id="@Model.Id">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">配送物品</label>
+                                        <div class="input-group">
+                                            <input name="ProductInfo" class="form-control" placeholder="請輸入配送物品資訊" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">備註（可選）</label>
+                                        <div class="input-group">
+                                            <input name="Note" class="form-control" placeholder="其他需要注意的事項" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-success me-md-2">
+                                        <i class="fas fa-plus-circle me-2"></i>新增地點
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                        <i class="fas fa-arrow-right me-2"></i>下一步：路線優化
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Excel匯入表單 (預設隱藏) -->
+                        <div id="excelImportForm" style="display:none;">
+                            <div class="text-center py-4">
+                                <i class="fas fa-file-excel fa-4x text-success mb-3"></i>
+                                <h4>Excel批量匯入</h4>
+                                <p class="text-muted mb-4">請下載範本檔案，填寫後上傳</p>
+
+                                <!-- Excel下載範本 -->
+                                <div class="d-flex justify-content-center gap-3 mb-4">
+                                    <a href="/templates/import_template.xlsx" class="btn btn-outline-primary">
+                                        <i class="fas fa-download me-2"></i>下載範本
+                                    </a>
+                                    
+                                    @* <button class="btn btn-success" onclick="document.getElementById('excelFileInput').click()">
+                                        <i class="fas fa-upload me-2"></i>選擇檔案
+                                    </button> *@
+
+                                    <a class="btn btn-success" asp-action="ImportExcel" asp-route-id="@Model.Id">
                                         <i class="fas fa-file-import me-2"></i>匯入Excel
                                     </a>
-                                    <p class="mt-3 small text-muted">支援格式：.xlsx, .xls</p>
+
+                                    <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none;" />
+                                </div>
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                        <i class="fas fa-arrow-right me-2"></i>下一步：路線優化
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- 配送地點清單 -->
-                @if (Model.Destinations?.Any() == true)
-                {
-                    <div class="container-fluid py-3">
-                        <div class="row align-items-center mb-3">
-                            <div class="col">
-                                <h4 class="text-dark fw-bold m-0">配送地點清單</h4>
-                            </div>
-                            <div class="col-auto">
-                                <span class="badge bg-secondary">共 @Model.Destinations.Count 個地點</span>
-                            </div>
-                        </div>
-
-                        <div class="card mb-4 border-0 shadow-sm">
-                            <div class="card-body p-0">
+                        
+                        <!-- 顯示已輸入的配送地點 -->
+                        @if (Model.Destinations?.Any() == true)
+                        {
+                            <div class="mt-5">
+                                <h5 class="mb-3"><i class="fas fa-list me-2"></i>已輸入的配送地點</h5>
                                 <div class="table-responsive">
-                                    <table class="table table-sm table-bordered mb-0">
+                                    <table class="table table-sm table-hover">
                                         <thead class="bg-light">
                                             <tr>
-                                                <th class="text-center">客戶名稱</th>
-                                                <th class="text-center">地址</th>
-                                                <th class="d-none d-md-table-cell text-center">配送物品</th>
-                                                <th class="d-none d-lg-table-cell text-center">備註</th>
-                                                <th class="text-center">狀態</th>
-                                                <th class="text-center">操作</th>
+                                                <th>客戶名稱</th>
+                                                <th>地址</th>
+                                                <th class="d-none d-md-table-cell">配送物品</th>
+                                                <th>操作</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach (var item in Model.Destinations)
                                             {
-                                                <tr>
+                                                <tr id="destination-row-@item.Id">
                                                     <td>@item.CustomerName</td>
+                                                    <td><small>@item.Address</small></td>
+                                                    <td class="d-none d-md-table-cell"><small>@item.ProductInfo</small></td>
                                                     <td>
-                                                        <span class="d-inline-block text-truncate"><small>@item.Address</small></span>
-                                                    </td>
-                                                    <td class="d-none d-md-table-cell">
-                                                        <span class="d-inline-block text-truncate"><small>@item.ProductInfo</small></span>
-                                                    </td>
-                                                    <td class="d-none d-lg-table-cell">
-                                                        <span class="d-inline-block text-truncate"><small>@item.Note</small></span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge @(item.Status == DeliveryStatus.Delivered ? "bg-success" : 
-                                                                            item.Status == DeliveryStatus.Skipped ? "bg-warning" : "bg-secondary")">
-                                                            @(item.Status == DeliveryStatus.Delivered ? "已送達" : 
-                                                            item.Status == DeliveryStatus.Skipped ? "已跳過" : "待送達")
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="btn-group btn-group-sm">
-                                                            <!-- 跳過按鈕 - 調整為與其他跳過按鈕一致的風格 -->
-                                                            <button class="btn btn-sm @(item.Status == DeliveryStatus.Skipped ? "btn-warning" : "btn-outline-warning") rounded-3 px-2 py-1" onclick="showSkipReason(@item.Id)" title="跳過">
-                                                                <i class="fas fa-ban"></i><span class="d-none d-md-inline ms-1">跳過</span>
-                                                            </button>
-                                                            
-                                                            <!-- 刪除按鈕 - 保持一致風格 -->
-                                                            <form asp-action="DeleteDestination" method="post" class="d-inline">
-                                                                <input type="hidden" name="id" value="@item.Id" />
-                                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 px-2 py-1" onclick="return confirm('確定要刪除此地點嗎？');" title="刪除">
-                                                                    <i class="fas fa-trash-alt"></i><span class="d-none d-md-inline ms-1">刪除</span>
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 路線優化 -->
-                        <div class="row mb-4">
-                            <div class="col-md-8 offset-md-2">
-                                <div class="card border-0 shadow-sm bg-gradient-light text-center">
-                                    <div class="card-body py-4">
-                                        <h5 class="mb-3"><i class="fas fa-magic me-2"></i>路線優化</h5>
-                                        <p class="text-muted mb-4">系統將根據您的配送點自動計算最佳路線，節省時間與燃料成本</p>
-                                        <form asp-action="OptimizeRoute" asp-route-id="@Model.Id" method="post">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-warning btn-lg">
-                                                <i class="fas fa-magic me-2"></i>自動排序配送路線
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- 當前送貨順序 -->
-                        <div class="card mb-4 border-0 shadow-sm">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0"><i class="fas fa-route me-2"></i>當前送貨順序</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 80px;">順序</th>
-                                                <th>客戶與地址</th>
-                                                <th class="d-none d-md-table-cell">備註</th>
-                                                <th class="text-center">狀態</th>
-                                                <th class="text-end">操作</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var d in Model.Destinations.OrderBy(d => d.SortOrder))
-                                            {
-                                                <tr class="@(d.Status == DeliveryStatus.Delivered ? "table-success" : d.Status == DeliveryStatus.Skipped ? "table-warning" : "")">
-                                                    <td class="text-center">
-                                                        <span class="badge bg-dark rounded-pill">@d.SortOrder</span>
-                                                    </td>
-                                                    <td>
-                                                        <strong>@d.CustomerName</strong>
-                                                        <p class="small text-muted mb-0">@d.Address</p>
-                                                    </td>
-                                                    <td class="d-none d-md-table-cell">
-                                                        <small>@(string.IsNullOrEmpty(d.Note) ? "無" : d.Note)</small>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge @(d.Status == DeliveryStatus.Delivered ? "bg-success" : 
-                                                                            d.Status == DeliveryStatus.Skipped ? "bg-warning" : "bg-secondary")">
-                                                            @(d.Status == DeliveryStatus.Delivered ? "已送達" : 
-                                                            d.Status == DeliveryStatus.Skipped ? "已跳過" : "待送達")
-                                                        </span>
-                                                    </td>
-                                                    <td class="text-end">
-                                                        <form asp-action="UpdateStatus" method="post" class="d-inline-flex gap-2">
-                                                            <input type="hidden" name="id" value="@d.Id" />
-
-                                                            <!-- 送達按鈕 - 使用綠色系表示成功 -->
-                                                            <button name="status" value="Delivered" class="btn btn-sm 
-                                                                    @(d.Status == DeliveryStatus.Delivered ? "btn-success" : "btn-outline-success") 
-                                                                    rounded-3 px-2 py-1">
-                                                                <i class="fas fa-check"></i> 送達
-                                                            </button>
-
-                                                            <!-- 跳過按鈕 - 保留紅色系表示警告 -->
-                                                            <button name="status" value="Skipped" onclick="showSkipReason(@Model.Id)" class="btn btn-sm 
-                                                                    @(d.Status == DeliveryStatus.Skipped ? "btn-danger" : "btn-outline-danger") 
-                                                                    rounded-3 px-2 py-1">
-                                                                <i class="fas fa-ban"></i> 跳過
-                                                            </button>
-
-                                                            <!-- 待送達按鈕 - 使用黃色系表示等待 -->
-                                                            <button name="status" value="Pending" class="btn btn-sm 
-                                                                    @(d.Status == DeliveryStatus.Pending ? "btn-warning" : "btn-outline-warning") 
-                                                                    rounded-3 px-2 py-1">
-                                                                <i class="fas fa-undo"></i> 待送達
+                                                        <!-- 刪除按鈕 -->
+                                                        <form id="deleteForm-@item.Id" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteDestination(@item.Id)">
+                                                                <i class="fas fa-trash-alt"></i>
                                                             </button>
                                                         </form>
                                                     </td>
@@ -287,23 +225,157 @@
                                     </table>
                                 </div>
                             </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 步驟3：路線優化 -->
+            <div id="step3" class="step-content" style="display:none;">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-route me-2"></i>步驟3：路線優化</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8 mb-4">
+                                <div id="optimize-map" style="width: 100%; height: 400px; border-radius: 8px; background-color: #f8f9fa;">
+                                    <div class="d-flex justify-content-center align-items-center h-100">
+                                        <div class="text-center">
+                                            <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
+                                            <p>地圖將在優化後顯示</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>路線資訊</h5>
+                                        <div id="route-info" class="mb-4">
+                                            <p class="text-muted">尚未進行路線優化</p>
+                                        </div>
+                                        
+                                        <div class="d-grid gap-3">
+                                            <form asp-action="OptimizeRoute" asp-route-id="@Model.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-warning btn-lg w-100">
+                                                    <i class="fas fa-magic me-2"></i>自動優化路線
+                                                </button>
+                                            </form>
+                                            
+                                            <button type="button" class="btn btn-outline-secondary btn-lg w-100" onclick="prevStep()">
+                                                <i class="fas fa-arrow-left me-2"></i>上一步
+                                            </button>
+                                            
+                                            <button type="button" class="btn btn-primary btn-lg w-100" onclick="nextStep()">
+                                                <i class="fas fa-arrow-right me-2"></i>下一步：開始配送
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 優化後的配送順序 -->
+                        <div class="mt-4">
+                            <h5 class="mb-3"><i class="fas fa-list-ol me-2"></i>優化後的配送順序</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th style="width: 60px;">順序</th>
+                                            <th>客戶名稱</th>
+                                            <th>地址</th>
+                                            <th class="d-none d-md-table-cell">配送物品</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Destinations.OrderBy(d => d.SortOrder))
+                                        {
+                                            <tr>
+                                                <td class="text-center">
+                                                    <span class="badge bg-dark rounded-pill">@item.SortOrder</span>
+                                                </td>
+                                                <td>@item.CustomerName</td>
+                                                <td><small>@item.Address</small></td>
+                                                <td class="d-none d-md-table-cell"><small>@item.ProductInfo</small></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                }
-                else
-                {
-                    <div class="alert alert-info">
-                        <div class="text-center py-5">
-                            <i class="fas fa-info-circle fa-3x mb-3"></i>
-                            <h4>尚無配送資料</h4>
-                            <p>請先新增配送地點，或匯入Excel數據</p>
+                </div>
+            </div>
+            
+            <!-- 步驟4：開始配送 -->
+            <div id="step4" class="step-content" style="display:none;">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-truck-loading me-2"></i>步驟4：開始配送</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8 mb-4">
+                                <div id="delivery-map" style="width: 100%; height: 500px; border-radius: 8px; background-color: #f8f9fa;">
+                                    <!-- 地圖將在這裡渲染 -->
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="fas fa-clipboard-list me-2"></i>配送清單</h5>
+                                        
+                                        <div class="delivery-progress mb-4">
+                                            <div class="progress mb-2" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 0%;">0%</div>
+                                            </div>
+                                            <p class="text-muted text-center small">
+                                                <span id="delivered-count">0</span> / <span id="total-count">@Model.Destinations.Count</span> 已完成
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="delivery-list-container" style="max-height: 300px; overflow-y: auto;">
+                                            <ul class="list-group">
+                                                @foreach (var item in Model.Destinations.OrderBy(d => d.SortOrder))
+                                                {
+                                                    <li class="list-group-item delivery-item" data-id="@item.Id">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>#@item.SortOrder @item.CustomerName</strong>
+                                                                <p class="small mb-0">@item.Address</p>
+                                                            </div>
+                                                            <div>
+                                                                <span class="badge bg-secondary">待送達</span>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="d-grid gap-3 mt-4">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="prevStep()">
+                                                <i class="fas fa-arrow-left me-2"></i>上一步
+                                            </button>
+                                            <button type="button" class="btn btn-success" id="start-delivery-btn">
+                                                <i class="fas fa-play me-2"></i>開始配送
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                }
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-<!-- 跳過原因彈框 -->
+<!-- 跳過原因彈框 (保持不變) -->
 <div id="skipReasonModal" class="modal fade" tabindex="-1" aria-labelledby="skipReasonModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -337,525 +409,241 @@
     </div>
 </div>
 
-
-@section Styles {
-    <style>
-        /* 整體樣式 */
-        body {
-            background-color: #f8f9fa;
-        }
-        
-
-        
-        .card:hover {
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-        }
-        
-        /* 表格樣式增強 */
-        .table {
-            margin-bottom: 0;
-        }
-        
-        .table th {
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-        
-        .table td {
-            vertical-align: middle;
-        }
-        
-        /* 背景漸層 */
-        .bg-gradient-primary {
-            background: linear-gradient(45deg, #37383a, #37383a);
-        }
-        
-        
-        .bg-gradient-light {
-            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-        }
-        
-        /* 按鈕懸停效果 */
-        .btn {
-            transition: all 0.3s ease;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        /* 響應式適配 */
-        @@media (max-width: 767.98px) {
-            .card-header h2 {
-                font-size: 1.5rem;
-            }
-            
-            .table-responsive {
-                border-radius: 0.25rem;
-            }
-            
-            .btn-group-sm .btn {
-                padding: 0.25rem 0.5rem;
-            }
-            
-            .step-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-            
-            .steps-wizard::before {
-                top: 19px;
-            }
-        }
-        
-        @@media (max-width: 575.98px) {
-            .step-icon {
-                width: 35px;
-                height: 35px;
-                font-size: 14px;
-            }
-            
-            .steps-wizard::before {
-                top: 17px;
-            }
-            
-            .card-header h2 {
-                font-size: 1.25rem;
-            }
-        }
-    </style>
-}
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
-    <script>
-        // 控制表單輸入方式顯示（單筆新增或Excel匯入）
-        function handleInputMethodChange() {
-            const selected = document.getElementById("inputMethod").value;
-            const singleInput = document.getElementById("singleInput");
-            const excelImport = document.getElementById("excelImport");
-
-            // 先全部隱藏
-            singleInput.style.display = "none";
-            excelImport.style.display = "none";
-
-            // 根據選擇顯示相對應區塊
-            if (selected === "single") {
-                singleInput.style.display = "block";
-            } else if (selected === "excel") {
-                excelImport.style.display = "block";
-            }
-        }
-
-        // 頁面載入時自動執行一次
-        window.addEventListener("DOMContentLoaded", () => {
-            handleInputMethodChange();
-        });
-
-
-
-
-
-        // 顯示跳過原因填寫框
-        function showSkipReason(destinationId) {
-            $('#destinationId').val(destinationId); // 填入目的地ID
-            $('#skipReasonModal').modal('show'); // 顯示 Modal
-        }
-
-        
-        // 切換自定義原因輸入框
-        function toggleCustomReason() {
-            var reasonType = $('#reasonType').val();
-            if (reasonType === 'custom') {
-                $('#reason').slideDown(300);
-                $('#reason').attr('required', true);
-            } else {
-                $('#reason').slideUp(300);
-                $('#reason').attr('required', false);
-            }
-        }
-        // 根據選擇的原因類型顯示自訂輸入框
-        $('#reasonType').change(function() {
-            if ($(this).val() === 'custom') {
-                $('#customReason').show();
-            } else {
-                $('#customReason').hide();
-            }
-        });
-
-        // 根據選擇的原因類型顯示自訂輸入框
-        function toggleCustomReason() {
-            if ($('#reasonType').val() === 'custom') {
-                $('#reason').show();  // 顯示自訂原因輸入框
-            } else {
-                $('#reason').hide();  // 隱藏自訂原因輸入框
-            }
-        }
-
-        // 提交跳過原因
-        $('#skipReasonForm').submit(function (e) {
-            e.preventDefault();
-            var reasonType = $('#reasonType').val();
-            var reason;
-            
-            // 根據選擇項生成原因
-            if (reasonType === 'custom') {
-                reason = $('#reason').val();
-            } else if (reasonType === 'not-at-home') {
-                reason = '客戶不在家';
-            } else if (reasonType === 'wrong-address') {
-                reason = '地址有誤';
-            } else if (reasonType === 'customer-request') {
-                reason = '客戶要求延後送達';
-            }
-            
-            var destinationId = $('#destinationId').val();
-            
-            // 用 AJAX 提交跳過原因
-            $.ajax({
-                url: '@Url.Action("UpdateSkipReason")',
-                method: 'POST',
-                data: {
-                    reason: reason,
-                    destinationId: destinationId
-                },
-                success: function (response) {
-                    $('#skipReasonModal').modal('hide');// 隱藏 Modal
-                    
-                    // 顯示成功訊息
-                    Swal.fire({
-                        title: '已更新',
-                        text: '配送備註已成功更新！',
-                        icon: 'success',
-                        confirmButtonText: '確定'
-                    }).then((result) => {
-                        location.reload(); // 重新加載頁面以更新狀態
-                    });
-                },
-                error: function() {
-                    Swal.fire({
-                        title: '發生錯誤',
-                        text: '更新失敗，請稍後再試',
-                        icon: 'error',
-                        confirmButtonText: '確定'
-                    });
-                }
-            });
-        }); 
-
-        // 地址自動補全 (需先加載Google Maps API)
-        $(document).ready(function() {
-            // 初始狀態
-            toggleInputMethod();
-            $('#inputMethod').change(toggleInputMethod);
-            
-            // 防止表單重複提交
-            $('form').submit(function() {
-                if ($(this).valid()) {
-                    $(this).find('button[type="submit"]').prop('disabled', true);
-                    $(this).find('button[type="submit"]').prepend(
-                        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
-                    );
-                }
-            });
-
-            // 地址自動補全 (需先加載Google Maps API)
-            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                var addressInput = document.getElementById('Address');
-                if (addressInput) {
-                    var autocomplete = new google.maps.places.Autocomplete(addressInput, { 
-                        types: ['geocode'],
-                        componentRestrictions: { country: 'tw' } // 限制台灣地址
-                    });
-                    
-                    // 避免在表單提交時自動完成干擾
-                    $('#addDestinationForm').on('keypress', function(e) {
-                        if (e.keyCode === 13) {
-                            e.preventDefault();
-                        }
-                    });
-                }
-            }
-            
-            // 顯示頁面加載動畫 (如果需要)
-            $(window).on('load', function() {
-                $('.loading-overlay').fadeOut();
-            });
-            
-            // 表格響應式處理
-            adjustTableDisplay();
-            $(window).resize(adjustTableDisplay);
-            
-            // 初始化提示工具
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            });
-            
-            // 如果有SweetAlert2，則使用它來美化確認對話框
-            if (typeof Swal !== 'undefined') {
-                // 刪除確認
-                $(document).on('click', '.delete-confirm', function(e) {
-                    e.preventDefault();
-                    var form = $(this).closest('form');
-                    
-                    Swal.fire({
-                        title: '確定要刪除？',
-                        text: '刪除後將無法復原！',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#dc3545',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: '是，刪除它',
-                        cancelButtonText: '取消'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            }
-        });
-        
-        // 調整表格顯示方式 (響應式設計)
-        function adjustTableDisplay() {
-            if ($(window).width() < 768) {
-                // 在小螢幕上，可能需要調整某些元素
-                $('.d-sm-none-custom').addClass('d-none');
-            } else {
-                $('.d-sm-none-custom').removeClass('d-none');
-            }
-        }
-        
-        // 增加進度指示器功能
-        function updateProgressIndicator() {
-            // 計算完成百分比
-            const destinations = @Json.Serialize(Model.Destinations?.Count ?? 0);
-            const completed = @Json.Serialize(Model.Destinations?.Count(d => d.Status == DeliveryStatus.Delivered || d.Status == DeliveryStatus.Skipped) ?? 0);
-            
-            if (destinations > 0) {
-                const percentage = Math.round((completed / destinations) * 100);
-                $('.progress-bar').css('width', percentage + '%').attr('aria-valuenow', percentage).text(percentage + '%');
-                
-                // 更新進度標籤
-                if (percentage === 100) {
-                    $('.progress-status').text('配送完成').removeClass('text-warning').addClass('text-success');
-                } else if (percentage > 0) {
-                    $('.progress-status').text('進行中').addClass('text-warning');
-                } else {
-                    $('.progress-status').text('未開始').removeClass('text-warning');
-                }
-            }
-        }
-        
-        // 頁面加載時更新進度
-        $(document).ready(function() {
-            updateProgressIndicator();
-        });
-        
-        // 地圖預覽功能 (如果有Google Maps API)
-        function initMap() {
-            // 檢查是否有地圖容器
-            var mapContainer = document.getElementById('route-map');
-            if (!mapContainer) return;
-            
-            // 檢查是否有Google Maps API
-            if (typeof google === 'undefined' || !google.maps) {
-                $('#route-map').html('<div class="alert alert-warning">Google Maps API 未載入，無法顯示地圖</div>');
-                return;
-            }
-            
-            // 初始化地圖
-            var map = new google.maps.Map(mapContainer, {
-                zoom: 13,
-                center: { lat: 25.033, lng: 121.565 }, // 預設台北市
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            });
-            
-            // 獲取配送點資料
-            var destinations = @Html.Raw(Json.Serialize(
-                (Model.Destinations ?? new List<ShipmentDestination>()).OrderBy(d => d.SortOrder).ToList()
-            ));
-            var origin = @Html.Raw(Json.Serialize(Model.OriginAddress ?? ""));
-            
-            if (destinations.length === 0) {
-                $('#route-map').html('<div class="alert alert-info">尚無配送點，無法顯示路線</div>');
-                return;
-            }
-            
-            // 設置起點標記
-            if (origin) {
-                var geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ 'address': origin }, function(results, status) {
-                    if (status === google.maps.GeocoderStatus.OK) {
-                        map.setCenter(results[0].geometry.location);
-                        
-                        // 添加起點標記
-                        new google.maps.Marker({
-                            map: map,
-                            position: results[0].geometry.location,
-                            title: '起點: ' + origin,
-                            icon: {
-                                url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                                scaledSize: new google.maps.Size(40, 40)
-                            },
-                            animation: google.maps.Animation.DROP
-                        });
-                        
-                        // 處理所有配送點
-                        processDestinations(map, destinations);
-                    }
-                });
-            } else {
-                processDestinations(map, destinations);
-            }
-        }
-        
-        // 處理配送點並繪製路線
-        function processDestinations(map, destinations) {
-            var bounds = new google.maps.LatLngBounds();
-            var infoWindow = new google.maps.InfoWindow();
-            var points = [];
-            
-            // 對每個配送點添加標記
-            destinations.forEach(function(dest, index) {
-                var geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ 'address': dest.address }, function(results, status) {
-                    if (status === google.maps.GeocoderStatus.OK) {
-                        // 保存位置點，用於後續繪製路線
-                        points.push(results[0].geometry.location);
-                        bounds.extend(results[0].geometry.location);
-                        
-                        // 創建標記
-                        var marker = new google.maps.Marker({
-                            map: map,
-                            position: results[0].geometry.location,
-                            title: dest.customerName,
-                            label: {
-                                text: (index + 1).toString(),
-                                color: 'white'
-                            },
-                            animation: google.maps.Animation.DROP
-                        });
-                        
-                        // 添加信息窗口
-                        google.maps.event.addListener(marker, 'click', function() {
-                            infoWindow.setContent(
-                                '<div class="map-info-window">' +
-                                '<h5>' + dest.customerName + '</h5>' +
-                                '<p><strong>地址:</strong> ' + dest.address + '</p>' +
-                                '<p><strong>狀態:</strong> ' + getStatusText(dest.status) + '</p>' +
-                                (dest.note ? '<p><strong>備註:</strong> ' + dest.note + '</p>' : '') +
-                                '</div>'
-                            );
-                            infoWindow.open(map, marker);
-                        });
-                        
-                        // 檢查是否所有點都已處理完畢，然後繪製路線
-                        if (points.length === destinations.length) {
-                            drawRoute(map, points);
-                            // 調整地圖範圍以顯示所有點
-                            map.fitBounds(bounds);
-                        }
-                    }
-                });
-            });
-        }
-        
-        // 繪製路線
-        function drawRoute(map, points) {
-            if (points.length < 2) return;
-            
-            var directionsService = new google.maps.DirectionsService();
-            var directionsRenderer = new google.maps.DirectionsRenderer({
-                map: map,
-                suppressMarkers: true, // 不顯示默認標記
-                polylineOptions: {
-                    strokeColor: '#007bff',
-                    strokeWeight: 5,
-                    strokeOpacity: 0.7
-                }
-            });
-            
-            // 準備路線請求
-            var origin = points[0];
-            var destination = points[points.length - 1];
-            var waypoints = [];
-            
-            // 添加中間點作為途經點
-            for (var i = 1; i < points.length - 1; i++) {
-                waypoints.push({
-                    location: points[i],
-                    stopover: true
-                });
-            }
-            
-            // 發送路線請求
-            directionsService.route({
-                origin: origin,
-                destination: destination,
-                waypoints: waypoints,
-                optimizeWaypoints: false, // 不優化路線順序，因為我們已經設置了順序
-                travelMode: google.maps.TravelMode.DRIVING
-            }, function(response, status) {
-                if (status === google.maps.DirectionsStatus.OK) {
-                    directionsRenderer.setDirections(response);
-                    
-                    // 計算總距離和時間
-                    var totalDistance = 0;
-                    var totalDuration = 0;
-                    
-                    response.routes[0].legs.forEach(function(leg) {
-                        totalDistance += leg.distance.value;
-                        totalDuration += leg.duration.value;
-                    });
-                    
-                    // 顯示路線資訊
-                    $('#route-info').html(
-                        '<div class="alert alert-info">' +
-                        '<i class="fas fa-info-circle me-2"></i>' +
-                        '總路程: ' + (totalDistance / 1000).toFixed(2) + ' 公里, ' +
-                        '預估時間: ' + Math.round(totalDuration / 60) + ' 分鐘' +
-                        '</div>'
-                    );
-                } else {
-                    console.error('無法獲取路線：', status);
-                    $('#route-info').html(
-                        '<div class="alert alert-danger">' +
-                        '<i class="fas fa-exclamation-triangle me-2"></i>' +
-                        '無法計算路線，請確保所有地址都是有效的。' +
-                        '</div>'
-                    );
-                }
-            });
-        }
-        
-        // 獲取狀態文字
-        function getStatusText(status) {
-            switch(status) {
-                case 0: return '待送達';
-                case 1: return '已送達';
-                case 2: return '已跳過';
-                default: return '未知';
-            }
-        }
-    </script>
-    
-    <!-- 如果需要Google Maps，請確保在_Layout中載入API -->
-    @if (Model.Destinations?.Any() == true) {
-        <script>
-            // 延遲載入地圖，確保頁面其他元素先載入完成
-            $(window).on('load', function() {
-                setTimeout(function() {
-                    if (typeof initMap === 'function') {
-                        initMap();
-                    }
-                }, 500);
-            });
-        </script>
+<style>
+    /* 步驟進度條樣式 */
+    .steps-progress {
+        padding: 0 20px;
     }
-}
+    .steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+    }
+    .steps:before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #e9ecef;
+        z-index: 1;
+    }
+    .step {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        flex: 1;
+    }
+    .step.active .step-icon {
+        background-color: #0d6efd;
+        color: white;
+    }
+    .step.active .step-label {
+        color: #0d6efd;
+        font-weight: bold;
+    }
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        background-color: #e9ecef;
+        color: #6c757d;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+    }
+    .step-label {
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    /* 步驟內容切換 */
+    .step-content {
+        display: none;
+    }
+    .step-content.active {
+        display: block;
+    }
+    
+    /* 懸停效果 */
+    .hover-effect {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .hover-effect:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* 配送清單項目樣式 */
+    .delivery-item.completed {
+        background-color: #f8f9fa;
+    }
+    .delivery-item.completed .badge {
+        background-color: #198754 !important;
+    }
+    .delivery-item.skipped {
+        background-color: #fff3cd;
+    }
+    .delivery-item.skipped .badge {
+        background-color: #ffc107 !important;
+    }
+    .delivery-item.current {
+        background-color: #e7f1ff;
+        border-left: 4px solid #0d6efd;
+    }
+</style>
+
+<script>
+
+    // 當前步驟
+    let currentStep = 1;
+    
+    // 選擇輸入方式
+    function selectInputMethod(method) {
+        if (method === 'single') {
+            document.getElementById('singleInputForm').style.display = 'block';
+            document.getElementById('excelImportForm').style.display = 'none';
+        } else if (method === 'excel') {
+            document.getElementById('singleInputForm').style.display = 'none';
+            document.getElementById('excelImportForm').style.display = 'block';
+        }
+
+        // 確保步驟2顯示並且進入下一步
+        document.getElementById('step2').style.display = 'block';
+        nextStep(); // 確保下一步邏輯正常
+    }
+
+    
+    // 下一步
+    function nextStep() {
+        const currentStepElement = document.getElementById(`step${currentStep}`);
+        const stepIndicatorElement = document.querySelector(`.step[data-step="${currentStep}"]`);
+
+        // 確保當前步驟的元素存在
+        if (currentStepElement && stepIndicatorElement) {
+            currentStepElement.classList.remove('active');
+            stepIndicatorElement.classList.remove('active');
+        } else {
+            console.error(`步驟 ${currentStep} 的元素未找到`);
+            return; // 停止執行，避免錯誤
+        }
+
+        currentStep++;
+
+        const nextStepElement = document.getElementById(`step${currentStep}`);
+        const nextStepIndicatorElement = document.querySelector(`.step[data-step="${currentStep}"]`);
+
+        // 確保下一步驟的元素存在
+        if (nextStepElement && nextStepIndicatorElement) {
+            nextStepElement.classList.add('active');
+            nextStepIndicatorElement.classList.add('active');
+        } else {
+            console.error(`步驟 ${currentStep} 的元素未找到`);
+            return; // 停止執行，避免錯誤
+        }
+
+        // 如果是步驟4，初始化地圖
+        if (currentStep === 4) {
+            initDeliveryMap();
+        }
+    }
+
+    
+    // 上一步
+    function prevStep() {
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+        
+        currentStep--;
+        
+        document.getElementById(`step${currentStep}`).classList.add('active');
+        document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+    }
+    
+    // 初始化配送地圖
+    function initDeliveryMap() {
+        // 這裡添加地圖初始化代碼
+        console.log('初始化配送地圖...');
+    }
+    
+    // 開始配送
+    document.getElementById('start-delivery-btn').addEventListener('click', function() {
+        // 這裡添加開始配送的邏輯
+        alert('配送已開始！');
+    });
+    
+    // 初始載入，確保步驟顯示
+    window.addEventListener('load', function() {
+        document.querySelector('.loading-overlay').style.display = 'none';
+        // 讓步驟1顯示
+        document.getElementById('step1').classList.add('active');
+    });
+
+    // 點刪除按鈕時，顯示確認對話框
+    document.addEventListener('DOMContentLoaded', function() {
+        // 為所有刪除按鈕綁定點擊事件（直接綁定 onclick 事件，不需要額外查詢）
+        document.body.addEventListener('click', function(e) {
+            if (e.target.closest('[onclick^="deleteDestination"]')) {
+                e.preventDefault();
+                // 直接從 onclick 屬性提取 ID
+                const id = e.target.getAttribute('onclick').match(/\d+/)[0];
+                confirmDelete(id);
+            }
+        });
+    });
+
+    // 顯示刪除確認對話框
+    function confirmDelete(id) {
+        Swal.fire({
+            title: '確定要刪除嗎？',
+            text: "刪除後將無法恢復！",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '確定刪除',
+            cancelButtonText: '取消'
+        }).then((result) => result.isConfirmed && deleteDestination(id)); // 簡化判斷
+    }
+
+    // 執行刪除 AJAX 請求
+    function deleteDestination(id) {
+        fetch('/Shipments/DeleteDestination', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
+            },
+            body: `id=${id}`
+        })
+        .then(handleResponse)      // 處理回應
+        .then(handleSuccess)       // 處理成功
+        .catch(handleError);       // 處理錯誤
+
+        // 處理伺服器回應
+        function handleResponse(response) {
+            if (!response.ok) throw new Error('網路錯誤');
+            return response.json();
+        }
+
+        // 處理刪除成功
+        function handleSuccess(data) {
+            if (data.success) {
+                Swal.fire('刪除成功', '', 'success');
+                document.querySelector(`#deleteForm-${id}`)?.closest('tr')?.remove(); // 安全移除行
+            } else {
+                Swal.fire('刪除失敗', data.message, 'error');
+            }
+        }
+
+        // 處理錯誤
+        function handleError(error) {
+            console.error("刪除錯誤:", error);
+            Swal.fire('錯誤', '刪除過程發生錯誤', 'error');
+        }
+    }
+
+</script>

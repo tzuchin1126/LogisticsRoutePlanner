@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace LogisticsRoutePlanner.Models
 {
     public enum DeliveryStatus
@@ -22,6 +24,7 @@ namespace LogisticsRoutePlanner.Models
         public string? Note { get; set; }
         public int SortOrder { get; set; }
 
+        [JsonIgnore] // 忽略 Shipment 屬性的序列化
         public Shipment Shipment { get; set; }
         public string? ProductInfo { get; internal set; }
 

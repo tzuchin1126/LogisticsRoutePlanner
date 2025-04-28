@@ -1,40 +1,18 @@
-// using LogisticsRoutePlanner.Helpers;
-// using OfficeOpenXml; // 確保已引用此命名空間
-// using LogisticsRoutePlanner.Data;
-// using Microsoft.EntityFrameworkCore;
-
-// var builder = WebApplication.CreateBuilder(args);
-
-// // 設定 EPPlus 授權為非商業用途（個人用途）
-// ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-// // 或者，如果是非商業組織
-// // EPPlusLicense.SetNonCommercialOrganization("YourOrganizationName");
-
-// builder.Services.AddDbContext<LogisticsDbContext>(options =>
-//     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-//     new MySqlServerVersion(new Version(8, 0, 23))));
-
-// builder.Services.AddControllersWithViews();
-
-
-
-
 using LogisticsRoutePlanner.Data;
 using LogisticsRoutePlanner.Helpers;
 using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml; // 確保已引用此命名空間
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
+// 資料庫設定
 builder.Services.AddDbContext<LogisticsDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     new MySqlServerVersion(new Version(8, 0, 23))));
 
-
-// Add services to the container.
+// ✅ 控制器與 JSON 循環參考處理
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
@@ -42,27 +20,24 @@ builder.Services.AddControllersWithViews()
     });
 
 
+// 初始化 Geocoding
+GeocodingHelper.Initialize(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 管線設定
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-// 在 Program.cs 或 Startup.cs 加入這段初始化
-GeocodingHelper.Initialize(builder.Configuration);
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
+// 預設路由
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Shipments}/{action=Index}/{id?}");
