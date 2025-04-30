@@ -6,6 +6,7 @@ using LogisticsRoutePlanner.Helpers;
 using System.Diagnostics;
 using LogisticsRoutePlanner.Models.ViewModels;
 using OfficeOpenXml;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace LogisticsRoutePlanner.Controllers
 {
@@ -172,7 +173,7 @@ namespace LogisticsRoutePlanner.Controllers
             }
         }
 
-        // 刪除配送目的地
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteDestination(int id)
@@ -184,16 +185,22 @@ namespace LogisticsRoutePlanner.Controllers
                 {
                     return Json(new { 
                         success = false, 
-                        message = $"找不到ID為 {id} 的地點" // 增加ID資訊方便除錯
+                        message = $"找不到ID為 {id} 的地點" 
                     });
                 }
 
                 _context.ShipmentDestinations.Remove(destination);
                 _context.SaveChanges();
                 
+                // 獲取剩餘目的地
+                var remainingDestinations = _context.ShipmentDestinations
+                    .Where(d => d.ShipmentId == destination.ShipmentId)
+                    .ToList();
+                
                 return Json(new { 
                     success = true,
-                    deletedId = id // 返回被刪除的ID
+                    id = id,
+                    destinations = remainingDestinations // 返回剩餘目的地
                 });
             }
             catch (Exception ex)
@@ -205,27 +212,47 @@ namespace LogisticsRoutePlanner.Controllers
             }
         }
 
-
-
-
-
-
+        [HttpGet]
+        public IActionResult TestRoute()
+        {
+            return Ok("成功對應到 ShipmentController！");
+        }
 
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        public IActionResult SkipDestination([FromBody] SkipReasonDto dto)
+        {
+            var destination = _context.ShipmentDestinations.Find(dto.Id);
+            if (destination == null)
+                return NotFound();
+
+            destination.Status = DeliveryStatus.Skipped;
+            destination.SkipReason = dto.Reason;
+            _context.SaveChanges();
+
+            return Ok(new { success = true });
+        }
+
+
+
+
+        // 接收前端的 POST 請求來刪除指定的出貨任務（Shipment）
+        [HttpPost]
+        [ValidateAntiForgeryToken] // 驗證防偽 Token，防止 CSRF 攻擊
         public async Task<IActionResult> Delete(int id)
         {
+             // 根據傳入的 id 從資料庫中查詢對應的 Shipment 資料
             var shipment = await _context.Shipments.FindAsync(id);
             if (shipment == null)
-            {
-                return NotFound();
-            }
-
+                return NotFound();  // 若找不到資料，回傳 404 Not Found
+            
+            // 從資料庫移除該筆 Shipment 資料
             _context.Shipments.Remove(shipment);
+
+            // 儲存異動至資料庫
             await _context.SaveChangesAsync();
 
-            return Ok(); // 改為 Ok() 以符合 fetch API 不重新導頁
+            return Ok();  // 回傳 200 OK 回應，符合前端 fetch API 的設計（不需重新導頁）
         }
 
 
@@ -341,17 +368,39 @@ namespace LogisticsRoutePlanner.Controllers
                     currentPoint = new { Lat = nearestDestination.Destination.Latitude, Lon = nearestDestination.Destination.Longitude };
                 }
 
-                // 輸出最終的路線順序
                 Console.WriteLine("優化後的路線順序:");
-                foreach (var dest in sortedDestinations.OrderBy(d => d.SortOrder))
+                // 依照最佳路線順序，重新賦值 SortOrder
+                for (int i = 0; i < sortedDestinations.Count; i++)
                 {
-                    Console.WriteLine($"{dest.SortOrder}. {dest.Address}");
+                    sortedDestinations[i].SortOrder = i + 1;  // 設置排序值
+                    Console.WriteLine($"{sortedDestinations[i].SortOrder}. {sortedDestinations[i].Address}");
                 }
-                // 🔻加這段
+
+                // 儲存到資料庫
                 _context.ShipmentDestinations.UpdateRange(sortedDestinations);
                 await _context.SaveChangesAsync();
+
+                
                 TempData["SuccessMessage"] = "送貨順序已優化";
-                return RedirectToAction("Details", new { id });
+                // return RedirectToAction("Details", new { id });
+
+                Console.WriteLine("優化路線成功");
+
+                // 返回 JSON 而非重定向
+                return Json(new { 
+                    success = true,
+                    message = "送貨順序已優化",
+                    optimizedDestinations = sortedDestinations.Select(d => new {
+                        id = d.Id,
+                        sortOrder = d.SortOrder, //排序順序
+                        customerName = d.CustomerName, //收貨人
+                        address = d.Address, //地址
+                        productInfo = d.ProductInfo, //產品資訊
+                        note = d.Note, //備註
+                        skipReason = d.SkipReason //跳過原因
+                    }).ToList()
+                });
+                
             }
             catch (Exception ex)
             {
@@ -447,18 +496,35 @@ namespace LogisticsRoutePlanner.Controllers
                 using var package = new OfficeOpenXml.ExcelPackage(stream);
                 var sheet = package.Workbook.Worksheets.First();
 
-                // 取得標題列
+                // 1. 取得標題列
                 var headers = new List<string>();
                 for (int col = 1; col <= sheet.Dimension.Columns; col++)
                 {
-                    string cellValue = sheet.Cells[1, col].Text.Trim();
-                    Console.WriteLine($"Column {col}: {cellValue}");
                     headers.Add(sheet.Cells[1, col].Text.Trim());
                 }
 
+                // 2. 新增資料行讀取
+                var previewData = new List<Dictionary<string, string>>();
+                for (int row = 2; row <= sheet.Dimension.Rows; row++) // 從第二列開始
+                {
+                    var rowData = new Dictionary<string, string>();
+                    for (int col = 1; col <= sheet.Dimension.Columns; col++)
+                    {
+                        rowData[headers[col-1]] = sheet.Cells[row, col].Text.Trim();
+                    }
+                    previewData.Add(rowData);
+                    
+                    // 只讀取前5行作為預覽
+                    if (row >= 5) break;
+                }
+
+                // 3. 傳遞更多資料到前端
                 ViewBag.Headers = headers;
+                ViewBag.PreviewData = previewData; // 新增這行
                 ViewBag.ShipmentId = shipmentId;
                 ViewBag.FileContent = Convert.ToBase64String(stream.ToArray());
+                ViewBag.ProductInfo = productInfo;
+                ViewBag.Note = note;
 
                 return View("MapColumns");
             }
@@ -468,6 +534,9 @@ namespace LogisticsRoutePlanner.Controllers
                 return RedirectToAction(nameof(ImportExcel), new { id = shipmentId });
             }
         }
+
+
+
 
 
 

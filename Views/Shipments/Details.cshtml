@@ -7,9 +7,6 @@
         var addDestinationModel = new AddDestinationViewModel { ShipmentId = Model.Id };
     }
 
-
-
-
 <div class="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999;">
     <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">載入中...</span>
@@ -73,7 +70,7 @@
                         <h5 class="mb-0"><i class="fas fa-keyboard me-2"></i>步驟1：選擇輸入方式</h5>
                     </div>
                     <div class="card-body text-center py-5">
-                        <div class="row">
+                        <div class="row align-items-stretch">
                             <div class="col-md-6 mb-4">
                                 <div class="card h-100 border-0 shadow-sm hover-effect" onclick="selectInputMethod('single')">
                                     <div class="card-body">
@@ -144,7 +141,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                     <button type="submit" class="btn btn-success me-md-2">
                                         <i class="fas fa-plus-circle me-2"></i>新增地點
@@ -154,6 +150,7 @@
                                     </button>
                                 </div>
                             </form>
+
                         </div>
                         
                         <!-- Excel匯入表單 (預設隱藏) -->
@@ -168,11 +165,6 @@
                                     <a href="/templates/import_template.xlsx" class="btn btn-outline-primary">
                                         <i class="fas fa-download me-2"></i>下載範本
                                     </a>
-                                    
-                                    @* <button class="btn btn-success" onclick="document.getElementById('excelFileInput').click()">
-                                        <i class="fas fa-upload me-2"></i>選擇檔案
-                                    </button> *@
-
                                     <a class="btn btn-success" asp-action="ImportExcel" asp-route-id="@Model.Id">
                                         <i class="fas fa-file-import me-2"></i>匯入Excel
                                     </a>
@@ -224,6 +216,14 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <!-- 自動排序按鈕，移動到表格右下角 -->
+                                @* <div class="d-flex justify-content-end mt-3">
+                                    <form asp-action="OptimizeRoute" asp-route-id="@Model.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-warning btn-lg" data-bs-toggle="tooltip" title="自動計算最優路線順序">
+                                            <i class="fas fa-magic me-2"></i>自動排序配送路線</button>
+                                    </form>
+                                </div> *@
                             </div>
                         }
                     </div>
@@ -257,12 +257,9 @@
                                         </div>
                                         
                                         <div class="d-grid gap-3">
-                                            <form asp-action="OptimizeRoute" asp-route-id="@Model.Id" method="post">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-warning btn-lg w-100">
-                                                    <i class="fas fa-magic me-2"></i>自動優化路線
-                                                </button>
-                                            </form>
+                                            <button id="optimizeRouteBtn" class="btn btn-warning btn-lg w-100" data-shipment-id="@Model.Id">
+                                                <i class="fas fa-magic me-2"></i>自動優化路線
+                                            </button>
                                             
                                             <button type="button" class="btn btn-outline-secondary btn-lg w-100" onclick="prevStep()">
                                                 <i class="fas fa-arrow-left me-2"></i>上一步
@@ -281,25 +278,35 @@
                         <div class="mt-4">
                             <h5 class="mb-3"><i class="fas fa-list-ol me-2"></i>優化後的配送順序</h5>
                             <div class="table-responsive">
-                                <table class="table table-sm table-hover">
+                                @* <table class="table table-sm table-hover"> *@
+                                <table id="destinationsTable" class="table table-sm table-hover">
                                     <thead class="bg-light">
                                         <tr>
                                             <th style="width: 60px;">順序</th>
-                                            <th>客戶名稱</th>
+                                            <th>客戶姓名</th>
                                             <th>地址</th>
                                             <th class="d-none d-md-table-cell">配送物品</th>
+                                            <th>備註</th>
+                                            <th>跳過原因</th>
+                                            <th>刪除</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach (var item in Model.Destinations.OrderBy(d => d.SortOrder))
                                         {
                                             <tr>
-                                                <td class="text-center">
-                                                    <span class="badge bg-dark rounded-pill">@item.SortOrder</span>
-                                                </td>
-                                                <td>@item.CustomerName</td>
+                                                <td class="text-center"><span class="badge bg-dark rounded-pill">@item.SortOrder</span></td>
+                                                <td><small>@item.CustomerName</small></td>
                                                 <td><small>@item.Address</small></td>
                                                 <td class="d-none d-md-table-cell"><small>@item.ProductInfo</small></td>
+                                                <td><small>@item.Note</small></td>
+                                                <td><small>@item.SkipReason</small></td>
+                                                @* 刪除按鈕 *@
+                                                <td>
+                                                    <button onclick="deleteDestination(@item.Id)" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         }
                                     </tbody>
@@ -319,7 +326,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-8 mb-4">
-                                <div id="delivery-map" style="width: 100%; height: 500px; border-radius: 8px; background-color: #f8f9fa;">
+                                <div id="map" style="width: 100%; height: 100%; border-radius: 8px; background-color: #f8f9fa;">
                                     <!-- 地圖將在這裡渲染 -->
                                 </div>
                             </div>
@@ -336,15 +343,15 @@
                                                 <span id="delivered-count">0</span> / <span id="total-count">@Model.Destinations.Count</span> 已完成
                                             </p>
                                         </div>
-                                        
                                         <div class="delivery-list-container" style="max-height: 300px; overflow-y: auto;">
                                             <ul class="list-group">
                                                 @foreach (var item in Model.Destinations.OrderBy(d => d.SortOrder))
                                                 {
-                                                    <li class="list-group-item delivery-item" data-id="@item.Id">
+                                                    <li class="list-group-item delivery-item" data-id="@item.Id" data-address="@item.Address" data-name="@item.CustomerName" data-note="@item.Note">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <div>
-                                                                <strong>#@item.SortOrder @item.CustomerName</strong>
+                                                                @* <strong>#@item.SortOrder @item.CustomerName</strong> *@
+                                                                <strong>@item.CustomerName</strong>
                                                                 <p class="small mb-0">@item.Address</p>
                                                             </div>
                                                             <div>
@@ -355,7 +362,6 @@
                                                 }
                                             </ul>
                                         </div>
-                                        
                                         <div class="d-grid gap-3 mt-4">
                                             <button type="button" class="btn btn-outline-secondary" onclick="prevStep()">
                                                 <i class="fas fa-arrow-left me-2"></i>上一步
@@ -367,47 +373,30 @@
                                     </div>
                                 </div>
                             </div>
+                            @* 新增code *@
+                            <div id="delivery-info">
+                                <p><strong>客戶姓名：</strong><span id="customer-name"></span></p>
+                                <p><strong>地址：</strong><span id="customer-address"></span></p>
+                                <p><strong>備註：</strong><span id="customer-note"></span></p>
+                                <p><strong>預計抵達時間：</strong><span id="estimated-arrival-time"></span></p>
+                            </div>
+
+                            <div id="delivery-action-buttons" style="display:none;">
+                                <button id="btn-delivered" class="btn btn-success">已送達</button>
+                                <button id="btn-skip" class="btn btn-warning">已跳過</button>
+                            </div>
+
+                            <div id="map" style="height: 400px; width: 100%;"></div>
+                            @* 新增code *@
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
-<!-- 跳過原因彈框 (保持不變) -->
-<div id="skipReasonModal" class="modal fade" tabindex="-1" aria-labelledby="skipReasonModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="skipReasonModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>跳過原因
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="skipReasonForm">
-                    <div class="form-group">
-                        <label for="reason" class="form-label">請選擇或輸入跳過原因：</label>
-                        <select id="reasonType" class="form-select mb-2" onchange="toggleCustomReason()">
-                            <option value="not-at-home">客戶不在家</option>
-                            <option value="wrong-address">地址有誤</option>
-                            <option value="customer-request">客戶要求延後</option>
-                            <option value="custom">其他原因</option>
-                        </select>
-                        <textarea id="reason" name="reason" class="form-control mt-2" rows="3" placeholder="請輸入詳細原因..." style="display:none;"></textarea>
-                    </div>
-                    <input type="hidden" id="destinationId" name="destinationId" />
-                    <div class="d-grid gap-2 mt-3">
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-paper-plane me-2"></i>提交原因
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <style>
     /* 步驟進度條樣式 */
@@ -496,154 +485,551 @@
     }
 </style>
 
-<script>
 
-    // 當前步驟
-    let currentStep = 1;
-    
-    // 選擇輸入方式
-    function selectInputMethod(method) {
-        if (method === 'single') {
-            document.getElementById('singleInputForm').style.display = 'block';
-            document.getElementById('excelImportForm').style.display = 'none';
-        } else if (method === 'excel') {
-            document.getElementById('singleInputForm').style.display = 'none';
-            document.getElementById('excelImportForm').style.display = 'block';
-        }
 
-        // 確保步驟2顯示並且進入下一步
-        document.getElementById('step2').style.display = 'block';
-        nextStep(); // 確保下一步邏輯正常
-    }
 
-    
-    // 下一步
-    function nextStep() {
-        const currentStepElement = document.getElementById(`step${currentStep}`);
-        const stepIndicatorElement = document.querySelector(`.step[data-step="${currentStep}"]`);
-
-        // 確保當前步驟的元素存在
-        if (currentStepElement && stepIndicatorElement) {
-            currentStepElement.classList.remove('active');
-            stepIndicatorElement.classList.remove('active');
-        } else {
-            console.error(`步驟 ${currentStep} 的元素未找到`);
-            return; // 停止執行，避免錯誤
-        }
-
-        currentStep++;
-
-        const nextStepElement = document.getElementById(`step${currentStep}`);
-        const nextStepIndicatorElement = document.querySelector(`.step[data-step="${currentStep}"]`);
-
-        // 確保下一步驟的元素存在
-        if (nextStepElement && nextStepIndicatorElement) {
-            nextStepElement.classList.add('active');
-            nextStepIndicatorElement.classList.add('active');
-        } else {
-            console.error(`步驟 ${currentStep} 的元素未找到`);
-            return; // 停止執行，避免錯誤
-        }
-
-        // 如果是步驟4，初始化地圖
-        if (currentStep === 4) {
-            initDeliveryMap();
-        }
-    }
-
-    
-    // 上一步
-    function prevStep() {
-        document.getElementById(`step${currentStep}`).classList.remove('active');
-        document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+    <script>
+        let currentStep = 1; // 當前步驟
         
-        currentStep--;
-        
-        document.getElementById(`step${currentStep}`).classList.add('active');
-        document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
-    }
-    
-    // 初始化配送地圖
-    function initDeliveryMap() {
-        // 這裡添加地圖初始化代碼
-        console.log('初始化配送地圖...');
-    }
-    
-    // 開始配送
-    document.getElementById('start-delivery-btn').addEventListener('click', function() {
-        // 這裡添加開始配送的邏輯
-        alert('配送已開始！');
-    });
-    
-    // 初始載入，確保步驟顯示
-    window.addEventListener('load', function() {
-        document.querySelector('.loading-overlay').style.display = 'none';
-        // 讓步驟1顯示
-        document.getElementById('step1').classList.add('active');
-    });
+        // 選擇輸入方式
+        function selectInputMethod(method) {
+            if (method === 'single') {
+                document.getElementById('singleInputForm').style.display = 'block';
+                document.getElementById('excelImportForm').style.display = 'none';
+            } else if (method === 'excel') {
+                document.getElementById('singleInputForm').style.display = 'none';
+                document.getElementById('excelImportForm').style.display = 'block';
+            }
 
-    // 點刪除按鈕時，顯示確認對話框
-    document.addEventListener('DOMContentLoaded', function() {
-        // 為所有刪除按鈕綁定點擊事件（直接綁定 onclick 事件，不需要額外查詢）
-        document.body.addEventListener('click', function(e) {
-            if (e.target.closest('[onclick^="deleteDestination"]')) {
-                e.preventDefault();
-                // 直接從 onclick 屬性提取 ID
-                const id = e.target.getAttribute('onclick').match(/\d+/)[0];
-                confirmDelete(id);
+            // 確保步驟2顯示並且進入下一步
+            document.getElementById('step2').style.display = 'block';
+            nextStep(); // 確保下一步邏輯正常
+        }
+
+    
+        // 下一步
+        function nextStep() {
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const stepIndicatorElement = document.querySelector(`.step[data-step="${currentStep}"]`);
+
+            if (currentStepElement && stepIndicatorElement) {
+                currentStepElement.classList.remove('active');
+                stepIndicatorElement.classList.remove('active');
+                currentStepElement.style.display = 'none'; 
+            } else {
+                console.error(`步驟 ${currentStep} 的元素未找到`);
+                return;
+            }
+
+            currentStep++;
+
+            const nextStepElement = document.getElementById(`step${currentStep}`);
+            const nextStepIndicatorElement = document.querySelector(`.step[data-step="${currentStep}"]`);
+
+            if (nextStepElement && nextStepIndicatorElement) {
+                nextStepElement.classList.add('active');
+                nextStepIndicatorElement.classList.add('active');
+                nextStepElement.style.display = 'block'; 
+            } else {
+                console.error(`步驟 ${currentStep} 的元素未找到`);
+                return;
+            }
+
+            if (currentStep === 4) {
+                initDeliveryMap();
+            }
+        }
+
+
+        
+        // 路線優化：上一步btn
+        function prevStep() {
+            if (currentStep <= 1) {
+                console.warn("已經是第一步，無法再回到更前面");
+                return;
+            }
+
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const stepIndicatorElement = document.querySelector(`.step[data-step="${currentStep}"]`);
+
+            if (currentStepElement && stepIndicatorElement) {
+                currentStepElement.classList.remove('active');
+                stepIndicatorElement.classList.remove('active');
+                currentStepElement.style.display = 'none';
+            }
+
+            currentStep--;
+
+            const prevStepElement = document.getElementById(`step${currentStep}`);
+            const prevStepIndicatorElement = document.querySelector(`.step[data-step="${currentStep}"]`);
+
+            if (prevStepElement && prevStepIndicatorElement) {
+                prevStepElement.classList.add('active');
+                prevStepIndicatorElement.classList.add('active');
+                prevStepElement.style.display = 'block';
+            }
+        }
+
+        
+        // 初始化配送地圖
+        function initDeliveryMap() {
+            // 這裡添加地圖初始化代碼
+            console.log('初始化配送地圖...');
+        }
+        
+        // 開始配送
+        let deliveryItems = Array.from(document.querySelectorAll('.delivery-item'));
+        let currentIndex = 0;
+        let directionsService;
+        let directionsRenderer;
+        let map;
+
+        document.getElementById('start-delivery-btn').addEventListener('click', function () {
+            if (!deliveryItems.length) {
+                alert("沒有任何配送項目！");
+                return;
+            }
+
+            const firstCustomerAddress = deliveryItems[currentIndex]?.dataset.address;
+            const firstCustomerName = deliveryItems[currentIndex]?.dataset.name;
+            const firstCustomerNote = deliveryItems[currentIndex]?.dataset.note;
+
+            if (!firstCustomerAddress) {
+                alert("找不到第一位客戶地址！");
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const driverLatLng = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // 傳入地址、姓名、備註 👇
+                    startNavigation(driverLatLng, firstCustomerAddress, firstCustomerName, firstCustomerNote);
+                    
+                    document.getElementById("delivery-action-buttons").style.display = "block";
+                }, function () {
+                    alert("無法取得您的位置，請確認裝置已開啟定位功能。");
+                });
+            } else {
+                alert("您的瀏覽器不支援定位功能。");
             }
         });
-    });
 
-    // 顯示刪除確認對話框
-    function confirmDelete(id) {
-        Swal.fire({
-            title: '確定要刪除嗎？',
-            text: "刪除後將無法恢復！",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '確定刪除',
-            cancelButtonText: '取消'
-        }).then((result) => result.isConfirmed && deleteDestination(id)); // 簡化判斷
-    }
 
-    // 執行刪除 AJAX 請求
-    function deleteDestination(id) {
-        fetch('/Shipments/DeleteDestination', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
-            },
-            body: `id=${id}`
-        })
-        .then(handleResponse)      // 處理回應
-        .then(handleSuccess)       // 處理成功
-        .catch(handleError);       // 處理錯誤
+        function startNavigation(driverLatLng, customerAddress, customerName, customerNote) {
+            console.log('客戶姓名:', customerName);  
+            console.log('客戶備註:', customerNote);  
 
-        // 處理伺服器回應
-        function handleResponse(response) {
-            if (!response.ok) throw new Error('網路錯誤');
-            return response.json();
+            const geocoder = new google.maps.Geocoder();
+
+            geocoder.geocode({ address: customerAddress }, function (results, status) {
+                if (status === 'OK') {
+                    const customerLocation = results[0].geometry.location;
+
+                    map = new google.maps.Map(document.getElementById("map"), {
+                        zoom: 14,
+                        center: driverLatLng
+                    });
+
+                    directionsService = new google.maps.DirectionsService();
+                    directionsRenderer = new google.maps.DirectionsRenderer();
+                    directionsRenderer.setMap(map);
+
+                    directionsService.route({
+                        origin: driverLatLng,
+                        destination: customerLocation,
+                        travelMode: google.maps.TravelMode.DRIVING
+                    }, function (response, status) {
+                        if (status === 'OK') {
+                            directionsRenderer.setDirections(response);
+                            const duration = response.routes[0].legs[0].duration.text;
+                            
+                            // 顯示配送資訊
+                            document.getElementById('customer-name').textContent = customerName || '無資料';
+                            document.getElementById('customer-address').textContent = customerAddress;
+                            document.getElementById('customer-note').textContent = customerNote || '無備註';
+                            document.getElementById('estimated-arrival-time').textContent = duration;
+
+                        } else {
+                            alert('導航失敗：' + status);
+                        }
+                    });
+                } else {
+                    alert('找不到地址：' + status);
+                }
+            });
         }
 
-        // 處理刪除成功
-        function handleSuccess(data) {
-            if (data.success) {
-                Swal.fire('刪除成功', '', 'success');
-                document.querySelector(`#deleteForm-${id}`)?.closest('tr')?.remove(); // 安全移除行
-            } else {
-                Swal.fire('刪除失敗', data.message, 'error');
+
+
+        function goToNextCustomer() {
+            currentIndex++;
+            if (currentIndex >= deliveryItems.length) {
+                Swal.fire("配送完成！", "您已完成所有配送。", "success").then(() => {
+                    window.location.href = '/Home/Index'; // 或返回首頁
+                });
+                return;
+            }
+
+            const nextCustomerAddress = deliveryItems[currentIndex]?.dataset.address;
+            const nextCustomerName = deliveryItems[currentIndex]?.dataset.name;
+            const nextCustomerNote = deliveryItems[currentIndex]?.dataset.note;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const driverLatLng = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    startNavigation(driverLatLng, nextCustomerAddress, nextCustomerName, nextCustomerNote);
+                });
             }
         }
 
-        // 處理錯誤
-        function handleError(error) {
-            console.error("刪除錯誤:", error);
-            Swal.fire('錯誤', '刪除過程發生錯誤', 'error');
-        }
-    }
+        // 點「已送達」
+        document.getElementById('btn-delivered').addEventListener('click', function () {
+            const item = deliveryItems[currentIndex];
+            item.querySelector('.badge').className = 'badge bg-success';
+            item.querySelector('.badge').textContent = '已送達';
 
-</script>
+            updateProgress();
+            goToNextCustomer();
+        });
+
+        // 點「已跳過」
+        document.getElementById('btn-skip').addEventListener('click', function () {
+            Swal.fire({
+                title: '請填寫跳過原因',
+                input: 'text',
+                inputPlaceholder: '如：客戶不在 / 聯絡不上...',
+                showCancelButton: true,
+                confirmButtonText: '送出',
+                cancelButtonText: '取消',
+                preConfirm: (reason) => {
+                    if (!reason) {
+                        Swal.showValidationMessage('請填寫原因');
+                    }
+                    return reason;
+                }
+            }).then(result => {
+                if (result.isConfirmed) {
+                    const reason = result.value;
+                    const item = deliveryItems[currentIndex];
+                    const id = item.dataset.id;
+
+                    item.querySelector('.badge').className = 'badge bg-warning';
+                    item.querySelector('.badge').textContent = '已跳過';
+
+                    // 傳送跳過原因至後端
+                    fetch('/Shipments/SkipDestination', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id, reason })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateProgress();
+                            goToNextCustomer();
+                            Swal.fire('跳過原因已提交', '', 'success');
+                        } else {
+                            Swal.fire('錯誤', '無法儲存跳過原因，請稍後再試', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('錯誤', '無法儲存跳過原因，請稍後再試', 'error');
+                    });
+                }
+            });
+        });
+
+
+
+        function updateProgress() {
+            const doneCount = document.querySelectorAll('.delivery-item .badge.bg-success, .delivery-item .badge.bg-warning').length;
+            const total = deliveryItems.length;
+            const percent = Math.round((doneCount / total) * 100);
+
+            // 如果配送完成，隱藏進度條
+            if (doneCount === total) {
+                document.querySelector('.progress-bar').style.display = 'none'; // 隱藏進度條
+                document.getElementById('delivered-count').textContent = `${doneCount} (完成)`;
+            } else {
+                document.querySelector('.progress-bar').style.display = 'block'; // 顯示進度條
+                document.querySelector('.progress-bar').style.width = `${percent}%`;
+                document.querySelector('.progress-bar').textContent = `${percent}%`;
+                document.getElementById('delivered-count').textContent = doneCount;
+            }
+        }
+
+        //-------------
+        // 初始載入，確保步驟顯示
+        window.addEventListener('load', function() {
+            document.querySelector('.loading-overlay').style.display = 'none';
+            // 讓步驟1顯示
+            document.getElementById('step1').classList.add('active');
+        });
+
+        // 點刪除按鈕時，顯示確認對話框
+        document.addEventListener('DOMContentLoaded', function() {
+            // 為所有刪除按鈕綁定點擊事件（直接綁定 onclick 事件，不需要額外查詢）
+            document.body.addEventListener('click', function(e) {
+                if (e.target.closest('[onclick^="deleteDestination"]')) {
+                    e.preventDefault();
+                    // 直接從 onclick 屬性提取 ID
+                    const id = e.target.getAttribute('onclick').match(/\d+/)[0];
+                    confirmDelete(id);
+                }
+            });
+        });
+
+        
+        // 顯示刪除確認對話框
+        function confirmDelete(id) {
+            return Swal.fire({
+                title: '確定要刪除嗎？',
+                text: "刪除後將無法恢復！",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '確定刪除',
+                cancelButtonText: '取消'
+            }).then((result) => result.isConfirmed);
+        }
+
+
+
+        // 統一的刪除函數
+        function deleteDestination(id) {
+            confirmDelete(id).then((confirmed) => {
+                if (confirmed) {
+                    performDelete(id);
+                }
+            });
+        }
+
+        // 執行刪除操作
+        function performDelete(id) {
+            fetch('/Shipments/DeleteDestination', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
+                },
+                body: `id=${id}`
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('網路錯誤');
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // 同時刪除兩個表格中的行
+                    removeTableRow('destination-row-', id);
+                    removeTableRow('optimized-row-', id);
+                    Swal.fire('刪除成功', '', 'success');
+                } else {
+                    Swal.fire('刪除失敗', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error("刪除錯誤:", error);
+                Swal.fire('錯誤', '刪除過程發生錯誤', 'error');
+            });
+        }
+
+        // 安全移除表格行
+        function removeTableRow(prefix, id) {
+            const row = document.getElementById(`${prefix}${id}`);
+            if (row) row.remove();
+        }
+
+        // 事件監聽（使用事件委派）
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[onclick^="deleteDestination"]');
+            if (btn) {
+                e.preventDefault();
+                const onclick = btn.getAttribute('onclick');
+                const idMatch = onclick.match(/deleteDestination\((\d+)\)/);
+                if (idMatch && idMatch[1]) {
+                    deleteDestination(parseInt(idMatch[1]));
+                }
+            }
+        });
+
+
+        
+        document.getElementById('optimizeRouteBtn').addEventListener('click', function() {
+            const shipmentId = this.getAttribute('data-shipment-id');
+            const token = document.querySelector('[name="__RequestVerificationToken"]').value;
+            
+            Swal.fire({
+                title: '正在優化路線',
+                text: '請稍候...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+            
+            fetch(`/Shipments/OptimizeRoute/${shipmentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(async response => {
+                const contentType = response.headers.get('content-type');
+                
+                // 檢查是否為 JSON 響應
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`無效的響應格式: ${text.substring(0, 100)}`);
+                }
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || '網路錯誤');
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                // 使用優化狀態檢查函數
+                const status = checkOptimizationStatus(data);
+                
+                if (status.isOptimized) {
+                    Swal.fire({
+                        title: '優化成功',
+                        text: status.message,
+                        icon: 'success'
+                    });
+                    
+                    // 使用處理過的目的地陣列
+                    updateOptimizedRoute(status.destinations);
+                } else {
+                    throw new Error(status.error || '優化處理失敗');
+                }
+            })
+            .catch(error => {
+                console.error('優化錯誤詳細信息:', error);
+                Swal.fire({
+                    title: '優化失敗',
+                    text: error.message,
+                    icon: 'error'
+                });
+            });
+        });
+
+
+        @* * 檢查路線是否已經優化 *@
+        @* * @param {Object} response - API回應物件 *@
+        @* * @returns {Object} - 包含優化狀態及相關資訊的物件 *@
+
+        function checkOptimizationStatus(response) {
+            // 檢查回應是否有效
+            if (!response) {
+                return {
+                    isOptimized: false,
+                    message: "未收到優化回應",
+                    success: false,
+                    error: "回應物件為空"
+                };
+            }
+
+            // 檢查成功標誌 (如果存在)
+            if (response.success === false) {
+                return {
+                    isOptimized: false,
+                    message: response.message || "優化失敗",
+                    success: false,
+                    error: response.message || "未知錯誤"
+                };
+            }
+
+            // 檢查優化目的地列表是否存在
+            // 處理兩種可能的格式：
+            // 1. optimizedDestinations 是直接的陣列
+            // 2. optimizedDestinations 是包含 $values 的物件
+            let destinations = null;
+            
+            if (Array.isArray(response.optimizedDestinations)) {
+                destinations = response.optimizedDestinations;
+            } else if (response.optimizedDestinations && 
+                    response.optimizedDestinations.$values && 
+                    Array.isArray(response.optimizedDestinations.$values)) {
+                destinations = response.optimizedDestinations.$values;
+            }
+            
+            if (!destinations || destinations.length === 0) {
+                return {
+                    isOptimized: false,
+                    message: "優化回應格式不正確",
+                    success: false,
+                    error: "響應缺少 optimizedDestinations 數組",
+                    rawResponse: JSON.stringify(response)
+                };
+            }
+
+            // 成功狀態 - 返回優化後的目的地列表
+            return {
+                isOptimized: true,
+                message: response.message || "送貨順序已優化",
+                success: true,
+                destinations: destinations,
+                optimizationDate: new Date().toISOString().split('T')[0]
+            };
+        }
+
+        // 更新優化後的路線顯示
+        function updateOptimizedRoute(destinations) {
+            console.log('處理後的數據:', destinations);
+            
+            // 驗證數據是否為數組
+            if (!Array.isArray(destinations)) {
+                console.error('錯誤: destinations 不是數組', destinations);
+                Swal.fire('錯誤', '收到的數據格式不正確', 'error');
+                return;
+            }
+            
+            const tbody = document.querySelector('#destinationsTable tbody');
+            if (!tbody) {
+                console.error('錯誤: 找不到表格或tbody元素');
+                return;
+            }
+            
+            tbody.innerHTML = ''; // 清空現有內容
+            
+            // 按新順序重新添加行
+            destinations.forEach(dest => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${dest.sortOrder}</td>
+                    <td>${dest.customerName}</td>
+                    <td>${dest.address}</td>
+                    <td>${dest.productInfo}</td>
+                    <td>${dest.note}</td>
+                    <td>${dest.skipReason || ""}</td>
+                    
+                    <td>
+                        <button onclick="deleteDestination(${dest.id})" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 標記為已優化
+            window.optimized = true;
+        }
+    </script>
+
+    <!-- In your HTML file, not inside JS -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4Zf8NREMQGBu6K0mW3p3My7yj-72vJYo" async defer></>

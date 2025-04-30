@@ -3,11 +3,11 @@
 <div class="container-fluid py-3">
     <div class="row align-items-center mb-3">
         <div class="col">
-            <h4 class="text-dark fw-bold m-0">配送任務列表</h4>
+            <h4 class="text-dark fw-bold m-0">任務列表</h4>
         </div>
         <div class="col-auto">
-            <a class="btn btn-sm btn-success" asp-action="Create">
-                <i class="fas fa-plus-circle me-1"></i> 新增任務
+            <a class="btn btn-primary btn-sm" style="border-radius: 980px; padding: 0.25rem 1rem; font-size: 0.875rem; font-weight: 500; border: none; transition: all 0.2s ease;" asp-action="Create">
+                <i class="fas fa-plus-circle me-1"></i> 新增
             </a>
 
         </div>
@@ -25,40 +25,42 @@
 
     @if (Model.Any())
     {
-        <div class="row">
+        <div class="row mt-3"> 
             <div class="col-12">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-body p-0">
+                    <div class="card-body p-3"> 
                         <div class="table-responsive">
-                            <table class="table table-sm table-bordered mb-0">
+                            <table class="table table-sm table-bordered mb-0 small"> 
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="text-nowrap" style="width: 25%">任務名稱</th>
-                                        <th style="width: 35%">出貨地點</th>
-                                        <th class="text-center" style="width: 20%">建立時間</th>
-                                        <th class="text-center" style="width: 20%">操作</th>
+                                        <th class="text-nowrap py-2" style="width: 25%; font-size: 0.8125rem">任務名稱</th> 
+                                        <th class="py-2" style="width: 35%; font-size: 0.8125rem">出貨地</th>
+                                        <th class="text-center py-2" style="width: 20%; font-size: 0.8125rem">建立時間</th>
+                                        <th class="text-center py-2" style="width: 20%; font-size: 0.8125rem">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var item in Model)
                                     {
                                         <tr>
-                                            <td class="align-middle">@item.ShipmentName</td>
-                                            <td class="align-middle">@item.OriginAddress</td>
+                                            <td class="align-middle" style="font-size: 0.8125rem">@item.ShipmentName</td> 
+                                            <td class="align-middle" style="font-size: 0.8125rem">@item.OriginAddress</td>
                                             <td class="align-middle text-center">
-                                                @* <span class="badge badge-light">
-                                                    @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
-                                                </span> *@
-                                                <span class="badge" style="background-color: #f8f9fa; color: #333;">
+                                                <span class="badge py-1 px-2" style="background-color: #f5f5f5; color: #595b5c; font-size: 0.75rem">
                                                     @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                                                 </span>
                                             </td>
                                             <td class="align-middle text-center">
-                                                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@item.Id">
-                                                    <i class="fas fa-info-circle me-1"></i> 明細
+                                                <a class="btn btn-outline-primary btn-sm rounded-pill px-2 py-1 me-1" 
+                                                style="font-size: 0.75rem; font-weight: 500;" 
+                                                asp-action="Details" 
+                                                asp-route-id="@item.Id">
+                                                    查看
                                                 </a>
-                                                <button class="btn btn-sm btn-danger ml-2" onclick="deleteShipment(@item.Id)">
-                                                    <i class="fas fa-trash-alt mr-1"></i> 刪除
+                                                <button class="btn btn-outline-danger btn-sm rounded-pill px-2 py-1" 
+                                                        style="font-size: 0.75rem; font-weight: 500;" 
+                                                        onclick="deleteShipment(@item.Id)">
+                                                    刪除
                                                 </button>
                                             </td>
                                         </tr>
@@ -71,33 +73,18 @@
             </div>
         </div>
 
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="d-flex justify-content-center">
-                    <nav aria-label="配送任務分頁">
-                        <ul class="pagination pagination-sm">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-label="上一頁">&laquo;</a>
-                            </li>
-                            <li class="page-item active">
-                                <a class="page-link" href="#">1</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">2</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">3</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="下一頁">&raquo;</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-                <div class="text-center small text-muted mt-2">
-                    共 @Model.Count() 筆任務
-                </div>
-            </div>
+        @* 分頁 *@
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted small">共 @Model.Count() 筆任務</div>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item disabled"><a class="page-link border-0" href="#">&laquo;</a></li>
+                    <li class="page-item active"><a class="page-link border-0" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link border-0" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link border-0" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link border-0" href="#">&raquo;</a></li>
+                </ul>
+            </nav>
         </div>
     }
     else
@@ -108,36 +95,59 @@
     }
 </div>
 
+
+
 @section Scripts {
+
+    <style>
+        .table-sm.small td, 
+        .table-sm.small th {
+            padding: 0.5rem 0.75rem; 
+            line-height: 1.3;
+        }
+
+        .table-sm.small .btn {
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+    </style>
+
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         function deleteShipment(id) {
+             // 顯示 SweetAlert2 的確認提示框
             Swal.fire({
                 title: '確定要刪除嗎？',
                 text: "刪除後將無法復原！",
                 icon: 'warning',
-                showCancelButton: true,
+                showCancelButton: true, // 顯示取消按鈕
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: '是的，刪除！',
-                cancelButtonText: '取消'
+                confirmButtonText: '確認刪除',
+                cancelButtonText: '取消' // 取消按鈕文字
             }).then((result) => {
+                // 使用者按下「確認刪除」後才執行以下程式碼
                 if (result.isConfirmed) {
+                    // 取得防偽 Token，避免 CSRF 攻擊
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
+                     // 使用 fetch 發送 POST 請求到刪除 API
                     fetch(`/Shipments/Delete/${id}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'RequestVerificationToken': token
+                            'RequestVerificationToken': token // 傳送 CSRF Token
                         }
                     })
                     .then(response => {
                         if (response.ok) {
+                            // 刪除成功，顯示成功提示並重新載入頁面
                             Swal.fire('刪除成功', '該任務已被刪除', 'success')
                                 .then(() => location.reload());
                         } else {
+                            // 若 response 不是 200 OK，顯示錯誤提示
                             Swal.fire('錯誤', '刪除失敗', 'error');
                         }
                     });
@@ -145,4 +155,4 @@
             });
         }
     </script>
-}
+} 

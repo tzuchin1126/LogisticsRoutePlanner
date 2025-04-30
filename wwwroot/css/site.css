@@ -1,5 +1,13 @@
+/* Base styles */
 html {
   font-size: 14px;
+  position: relative;
+  min-height: 100%;
+  background-color: #f5f5f6;
+  color: #5e5d5d;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @media (min-width: 768px) {
@@ -8,16 +16,457 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
   margin-bottom: 60px;
+  background-color: #f5f5f6;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  color: #3a393a;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+p {
+  color: #5e5d5d;
+  margin-bottom: 1.5rem;
+}
+
+a {
+  color: #0066cc;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: #004499;
+}
+
+.container {
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.btn-primary {
+  background-color: #0066cc;
+  border-color: #0066cc;
+  border-radius: 980px;
+  padding: 8px 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #004499;
+  border-color: #004499;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #0066cc;
+}
+
+/* Apple-style navbar */
+.navbar {
+  padding: 0;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background-color: rgba(245, 245, 246, 0.8) !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: none;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+  height: 48px;
+}
+
+.navbar-brand {
+  padding: 0 20px;
+  font-size: 1.1rem;
+  color: #3a393a !important;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  height: 48px;
+}
+
+.navbar-toggler {
+  border: none;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+.nav-link {
+  color: #3a393a !important;
+  font-size: 0.85rem;
+  font-weight: 400;
+  padding: 0 20px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #5e5d5d !important;
+}
+
+.nav-link-text {
+  position: relative;
+  z-index: 1;
+}
+
+.nav-link-hover {
+  position: absolute;
+  bottom: 10px;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background-color: #3a393a;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.nav-link:hover .nav-link-hover {
+  transform: scaleX(1);
+}
+
+/* Mobile menu styles */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    background-color: rgba(245, 245, 246, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .nav-link {
+    padding: 12px 20px;
+    height: auto;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .nav-link-hover {
+    display: none;
+  }
+}
+
+/* Main content styles */
+.section {
+  padding: 80px 0;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+}
+
+.section-subtitle {
+  font-size: 1.5rem;
+  font-weight: normal;
+  margin-bottom: 3rem;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: #5e5d5d;
+}
+
+.card {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #ffffff;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+  color: #3a393a;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 1.2rem;
+}
+
+.card-text {
+  color: #5e5d5d;
+  font-size: 0.95rem;
+}
+
+/* Apple-style footer */
+footer {
+  background-color: #f5f5f6 !important;
+  color: #5e5d5d;
+  font-size: 0.8rem;
+  padding: 30px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+footer h5 {
+  color: #3a393a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+footer ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+footer li {
+  margin-bottom: 0.5rem;
+}
+
+footer a {
+  color: #5e5d5d !important;
+  transition: color 0.3s ease;
+  position: relative;
+  font-size: 0.8rem;
+}
+
+footer a:hover {
+  color: #3a393a !important;
+  text-decoration: none;
+}
+
+footer a:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background-color: #3a393a;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+footer a:hover:after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.footer-copyright {
+  padding-top: 20px;
+  margin-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 767.98px) {
+  .footer-links {
+    margin-bottom: 2rem;
+  }
+  
+  .text-md-end {
+    text-align: left !important;
+    margin-top: 1.5rem;
+  }
+}
+
+/* Hero section styling */
+.hero {
+  background-color: #ffffff;
+  padding: 100px 0;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: #3a393a;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  color: #5e5d5d;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+/* Feature section */
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 1rem;
+}
+
+/* Pagination styling */
+.pagination {
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.pagination .page-link {
+  border-radius: 8px;
+  color: #3a393a;
+  margin: 0 4px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.03);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #3a393a;
+  color: #ffffff;
+}
+
+
+/* 改進的Apple風格導航欄 */
+.navbar {
+  padding: 0;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background-color: rgba(245, 245, 246, 0.8) !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: none;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+  height: 44px;
+}
+
+.navbar-brand {
+  padding: 0 20px;
+  font-size: 1.1rem;
+  color: #3a393a !important;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  height: 44px;
+  letter-spacing: -0.01em;
+}
+
+.navbar-brand i {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+.navbar-toggler {
+  border: none;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+/* 改進導航鏈接樣式 */
+.navbar .nav-item {
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar .nav-link {
+  color: #5e5d5d !important;
+  font-size: 0.82rem;
+  font-weight: 400;
+  padding: 0 12px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+  letter-spacing: -0.01em;
+  position: relative;
+}
+
+.navbar .nav-link:hover {
+  color: #3a393a !important;
+}
+
+/* 移除上一版本的複雜結構 */
+.navbar .nav-link i {
+  margin-right: 6px;
+  font-size: 0.9rem;
+  color: #5e5d5d;
+  transition: color 0.2s ease;
+}
+
+.navbar .nav-link:hover i {
+  color: #3a393a;
+}
+
+/* 簡化下劃線效果 */
+.navbar .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background-color: #3a393a;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.navbar .nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* 當導航項目為活動狀態時的樣式 */
+.navbar .nav-item.active .nav-link {
+  color: #3a393a !important;
+}
+
+.navbar .nav-item.active .nav-link i {
+  color: #3a393a;
+}
+
+.navbar .nav-item.active .nav-link::after {
+  transform: scaleX(1);
+}
+
+
+/* --------- */
+
+/* 移動設備樣式 */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+      background-color: rgba(245, 245, 246, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .navbar .nav-item {
+      height: auto;
+  }
+  
+  .navbar .nav-link {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .navbar .nav-link::after {
+      display: none;
+  }
+}

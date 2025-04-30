@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "x+Uf2OM+f8FWqhdSNRK+MAzqxUduGerXOd9JarBRtEI=",
+  "Hash": "p3oPtRJy6/LMDyh262AkR/ZVN1SsHzkEOmVSq4qizyE=",
   "Source": "LogisticsRoutePlanner",
   "BasePath": "_content/LogisticsRoutePlanner",
   "Mode": "Default",
@@ -1193,6 +1193,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/lib/jquery/LICENSE.txt"
+    },
+    {
+      "Identity": "/Users/tzuchin/LogisticsRoutePlanner/wwwroot/templates/import_template.xlsx",
+      "SourceId": "LogisticsRoutePlanner",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/tzuchin/LogisticsRoutePlanner/wwwroot/",
+      "BasePath": "_content/LogisticsRoutePlanner",
+      "RelativePath": "templates/import_template.xlsx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/templates/import_template.xlsx"
     }
   ]
 }
