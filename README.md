@@ -1,4 +1,7 @@
 # 物流配送路線優化系統
+<img width="1468" alt="iShot_2025-05-05_19 35 34" src="https://github.com/user-attachments/assets/42d8da9a-26e5-4dd2-8caf-51e352874c0c" />
+(頁面上的地址均為google地圖上隨意找尋做範例)
+
 
 這是一個基於 **ASP.NET Core MVC** 開發的物流配送路線優化系統，旨在幫助企業根據出貨地點與客戶地點自動生成最優配送路線。系統提供了匯入功能，能夠批量處理配送清單，並根據實際需求優化配送順序。
 
