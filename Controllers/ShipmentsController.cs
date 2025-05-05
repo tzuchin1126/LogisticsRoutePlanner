@@ -192,6 +192,7 @@ namespace LogisticsRoutePlanner.Controllers
                 .Where(d => d.ShipmentId == destination.ShipmentId)
                 .ToList();
             
+            
             return Json(new { 
                 success = true,
                 id = id,
