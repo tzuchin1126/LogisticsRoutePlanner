@@ -35,11 +35,8 @@
                                 <div class="form-text text-muted" id="preview-@field.Item2"></div>
                             </div>
                         }
-
                         <div class="text-end">
-                            <button type="submit" class="btn btn-sm rounded-pill px-3" 
-                                    style="background-color: #0071e3; color: white; font-weight: 500;"
-                                    id="submitBtn">
+                            <button type="submit" class="btn btn-sm rounded-pill px-3" style="background-color: #0071e3; color: white; font-weight: 500;" id="submitBtn">
                                 <i class="fas fa-check-circle me-1"></i> 確認匯入
                             </button>
                         </div>
@@ -212,8 +209,12 @@
 
         // 防止表單重複提交
         document.getElementById("submitBtn")?.addEventListener("click", function() {
+            event.preventDefault();  // 防止表單的默認提交行為
             this.disabled = true;
             this.innerHTML = "<i class=\"fas fa-spinner fa-spin me-1\"></i> 匯入中...";
+            
+            // 確保表單提交
+            document.querySelector("form").submit();
         });
     </script>
 }

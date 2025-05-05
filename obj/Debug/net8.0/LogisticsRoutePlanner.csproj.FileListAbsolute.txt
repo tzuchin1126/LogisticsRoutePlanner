@@ -117,3 +117,6 @@
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.genruntimeconfig.cache
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/ref/LogisticsRoutePlanner.dll
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.sourcelink.json
+/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/GoogleMaps.LocationServices.dll
+/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/GoogleMapsApi.dll
+/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Newtonsoft.Json.dll

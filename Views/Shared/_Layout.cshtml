@@ -119,12 +119,17 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <!-- Apple風格logo -->
-            <a class="navbar-brand" href="/">
-                @* <i class="far fa-truck-loading"></i> *@
+            @* <a class="navbar-brand" href="/">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">
                     <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5v-7zm1.294 7.456A1.999 1.999 0 0 1 4.732 11h5.536a2.01 2.01 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456zM12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12v4zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
                 </svg>
-                LogisticsRoutePlanner
+                  物流配送路線規劃系統
+            </a> *@
+            <a class="navbar-brand d-flex align-items-center" href="/"></a>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-truck me-2" viewBox="0 0 16 16">
+                    <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5v-7zm1.294 7.456A1.999 1.999 0 0 1 4.732 11h5.536a2.01 2.01 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456zM12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12v4zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                </svg>
+                <span>物流配送路線規劃系統</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -134,32 +139,28 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="/">
-                            @* <i class="far fa-home"></i> *@
+                        <a class="nav-link" href="Index">
                             首頁
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/routes">
-                            @* <i class="far fa-route"></i> *@
-                            路線
+                        <a class="nav-link" href="Index">
+                            任務
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/vehicles">
-                            @* <i class="far fa-truck"></i> *@
+                        <a class="nav-link" href="/Reports/index">
+                            報表
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        @* <a class="nav-link" href="/analytics"> *@
+                        <a class="nav-link" asp-controller="Vehicle" asp-action="Index">
                             車輛
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/analytics">
-                            @* <i class="far fa-chart-bar"></i> *@
-                            分析
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="/settings">
-                            <i class="far fa-cog"></i>
                             設置
                         </a>
                     </li>
@@ -175,9 +176,8 @@
             @RenderBody()
         </main>
     </div>
-
-    <footer class="bg-light">
-        <div class="container py-5">
+    <footer class="bg-light mt-5">
+        <div class="container py-2">
             <div class="row">
                 <div class="col-md-6">
                     <div class="d-flex align-items-center mb-3">
@@ -200,6 +200,7 @@
             </div>
         </div>
     </footer>
+    
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

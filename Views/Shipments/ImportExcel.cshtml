@@ -40,7 +40,7 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
+    @* <script>
         document.getElementById("uploadForm").addEventListener("submit", function (e) {
             const fileInput = document.getElementById("file");
             const file = fileInput.files[0];
@@ -61,5 +61,86 @@
                 });
             }
         });
+    </script> *@
+
+    <!-- 加入 animate.css 提供動畫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", function (e) {
+            const fileInput = document.getElementById("file"); // 取得檔案輸入欄位
+            const file = fileInput.files[0]; // 取得選擇的檔案
+
+            // 檢查是否有選檔案
+            if (!file) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: '錯誤',
+                    text: '請選擇檔案',
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
+                return;
+            }
+
+            const fileName = file.name.toLowerCase();
+            const fileSize = file.size;
+            const maxSize = 5 * 1024 * 1024; // 5MB 上限
+
+            // 副檔名檢查
+            if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: '檔案格式錯誤',
+                    text: '請上傳副檔名為 .xlsx 或 .xls 的 Excel 檔案',
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOut'
+                    }
+                });
+                return;
+            }
+
+            // 檔案大小檢查
+            if (fileSize > maxSize) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: '檔案太大',
+                    text: '請上傳 5MB 以下的檔案',
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOut'
+                    }
+                });
+                return;
+            }
+
+            // 顯示上傳中動畫，再送出表單
+            e.preventDefault();
+            Swal.fire({
+                title: '上傳中...',
+                text: '請稍候',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    document.getElementById("uploadForm").submit(); // 驗證通過才送出
+                }
+            });
+        });
     </script>
+
+
+
 }

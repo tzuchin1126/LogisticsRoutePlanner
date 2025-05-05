@@ -13,49 +13,70 @@ public class ReportsController : Controller
         _context = context;
     }
 
-
     public async Task<IActionResult> Index(string month, string status, string customer, int page = 1)
     {
-        DateTime startDate, endDate;
+        // 參數初始化
         int pageSize = 10;
+        page = page < 1 ? 1 : page; // 確保頁數不小於1
 
-        // 預設當月
+        // 月份處理
         if (string.IsNullOrEmpty(month))
             month = DateTime.Now.ToString("yyyy-MM");
 
-        // 嘗試解析選擇的月份
-        if (!DateTime.TryParseExact($"{month}-01", "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out startDate))
+        if (!DateTime.TryParseExact($"{month}-01", "yyyy-MM-dd", null, 
+            System.Globalization.DateTimeStyles.None, out var startDate))
         {
-            return View(new List<Shipment>()); // 如果解析失敗，返回空清單
+            return View(new List<Shipment>());
         }
-        
-        endDate = startDate.AddMonths(1); // 設定當月結束日期
 
-        // 查詢基礎資料
+        var endDate = startDate.AddMonths(1);
+
+        // 基礎查詢
         var query = _context.Shipments
             .Include(s => s.Destinations)
             .Where(s => s.ShipmentDate >= startDate && s.ShipmentDate < endDate);
 
-        // 配送狀態篩選
+        // 狀態過濾
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<DeliveryStatus>(status, out var parsedStatus))
         {
-            query = query.Where(s => s.Destinations.Any(d => d.Status == parsedStatus));
+            query = query
+                .Where(s => s.Destinations.Any(d => d.Status == parsedStatus))
+                .Select(s => new Shipment
+                {
+                    Id = s.Id,
+                    ShipmentDate = s.ShipmentDate,
+                    Destinations = s.Destinations
+                        .Where(d => d.Status == parsedStatus)
+                        .ToList()
+                });
         }
-        // 計算總筆數
-        var totalRecords = await query.CountAsync();
 
-        // 分頁
+        // 客戶過濾（如果啟用）
+        if (!string.IsNullOrEmpty(customer))
+        {
+            query = query.Where(s => s.Destinations.Any(d => 
+                d.CustomerName.Contains(customer)));
+        }
+
+        // 分頁處理
+        var totalRecords = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+        page = Math.Min(page, totalPages); // 確保不超過總頁數
+
         var shipments = await query
-            .OrderByDescending(s => s.ShipmentDate)  // 排序：出貨日期遞減
-            .Skip((page - 1) * pageSize)  // 跳過前面頁數的資料
-            .Take(pageSize)  // 取當頁資料
+            .OrderByDescending(s => s.ShipmentDate)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        // 設定分頁資料
-        ViewBag.Month = month;
-        ViewBag.TotalRecords = totalRecords;
-        ViewBag.TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-        ViewBag.CurrentPage = page;
+        // 傳遞參數到視圖
+        ViewData["Month"] = month;
+        ViewData["Status"] = status;
+        ViewData["Customer"] = customer;
+        ViewData["TotalRecords"] = totalRecords;
+        ViewData["TotalPages"] = totalPages;
+        ViewData["CurrentPage"] = page;
+        ViewData["PageSize"] = pageSize;
 
         return View(shipments);
     }

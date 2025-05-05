@@ -54,7 +54,7 @@ a:hover {
   background-color: #0066cc;
   border-color: #0066cc;
   border-radius: 980px;
-  padding: 8px 24px;
+  /* padding: 8px 24px; */
   font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -311,7 +311,7 @@ footer a:hover:after {
 /* Pagination styling */
 .pagination {
   justify-content: center;
-  margin-top: 3rem;
+  /* margin-top: 3rem; */
 }
 
 .pagination .page-link {

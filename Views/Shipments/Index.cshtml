@@ -34,8 +34,9 @@
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="text-nowrap py-2" style="width: 25%; font-size: 0.8125rem">任務名稱</th> 
-                                        <th class="py-2" style="width: 35%; font-size: 0.8125rem">出貨地</th>
-                                        <th class="text-center py-2" style="width: 20%; font-size: 0.8125rem">建立時間</th>
+                                        <th class="py-2" style="width: 25%; font-size: 0.8125rem">出貨地</th>
+                                        <th class="text-center py-2" style="width: 15%; font-size: 0.8125rem">配送車輛</th>
+                                        <th class="text-center py-2" style="width: 15%; font-size: 0.8125rem">建立時間</th>
                                         <th class="text-center py-2" style="width: 20%; font-size: 0.8125rem">操作</th>
                                     </tr>
                                 </thead>
@@ -45,6 +46,7 @@
                                         <tr>
                                             <td class="align-middle" style="font-size: 0.8125rem">@item.ShipmentName</td> 
                                             <td class="align-middle" style="font-size: 0.8125rem">@item.OriginAddress</td>
+                                            <td class="align-middle" style="font-size: 0.8125rem">@item.VehicleNumber</td>
                                             <td class="align-middle text-center">
                                                 <span class="badge py-1 px-2" style="background-color: #f5f5f5; color: #595b5c; font-size: 0.75rem">
                                                     @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
@@ -72,19 +74,46 @@
                 </div>
             </div>
         </div>
+        <!-- 分頁 -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    
+                    <!-- 分頁導航 -->
+                    @if (ViewData["TotalPages"] != null && ViewData["CurrentPage"] != null)
+                    {
+                        var totalPages = (int)ViewData["TotalPages"];
+                        var currentPage = (int)ViewData["CurrentPage"];
+                        
+                        <nav aria-label="任務分頁">
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" href="?page=@(currentPage - 1)" aria-label="上一頁">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
 
-        @* 分頁 *@
-        <div class="d-flex justify-content-between align-items-center mt-4">
-            <div class="text-muted small">共 @Model.Count() 筆任務</div>
-            <nav>
-                <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item disabled"><a class="page-link border-0" href="#">&laquo;</a></li>
-                    <li class="page-item active"><a class="page-link border-0" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link border-0" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link border-0" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link border-0" href="#">&raquo;</a></li>
-                </ul>
-            </nav>
+                                @for (int i = 1; i <= totalPages; i++)
+                                {
+                                    <li class="page-item @(i == currentPage ? "active" : "")">
+                                        <a class="page-link" href="?page=@i">@i</a>
+                                    </li>
+                                }
+
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <a class="page-link" href="?page=@(currentPage + 1)" aria-label="下一頁">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                    <!-- 記錄數資訊 -->
+                    <div class="text-muted small">
+                        顯示 @((ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1)-@Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalRecords) 筆，共 @ViewBag.TotalRecords 筆
+                    </div>
+                </div>
+            </div>
         </div>
     }
     else
@@ -94,7 +123,6 @@
         </div>
     }
 </div>
-
 
 
 @section Scripts {
@@ -154,5 +182,15 @@
                 }
             });
         }
+
+         // 頁面大小選擇器
+        document.getElementById('pageSizeSelector').addEventListener('change', function() {
+            const pageSize = this.value;
+            window.location.href = `?page=1&pageSize=${pageSize}`;
+        });
+        
+        // 設置當前選擇的頁面大小
+        document.getElementById('pageSizeSelector').value = '@ViewData["PageSize"]';
+
     </script>
 } 
