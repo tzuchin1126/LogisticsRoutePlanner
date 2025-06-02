@@ -1,19 +1,16 @@
-# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# 使用 ASP.NET Core 執行環境
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+# 建置階段
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-
-# 複製專案檔並還原相依套件
-COPY *.csproj ./
-RUN dotnet restore
-
-# 複製全部程式碼並建置
-COPY . ./
+COPY . .
 RUN dotnet publish -c Release -o /app/publish
 
-# Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# 發行階段
+FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-
-# 啟動你的應用程式
 ENTRYPOINT ["dotnet", "LogisticsRoutePlanner.dll"]

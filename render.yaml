@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: aspnetcore-app
+    env: docker
+    region: singapore
+    plan: free
+    branch: main
+    autoDeploy: true
