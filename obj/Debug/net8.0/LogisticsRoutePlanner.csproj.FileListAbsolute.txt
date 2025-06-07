@@ -7,6 +7,8 @@
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/LogisticsRoutePlanner.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/LogisticsRoutePlanner.pdb
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/EPPlus.dll
+/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/GoogleMaps.LocationServices.dll
+/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/GoogleMapsApi.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Humanizer.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Microsoft.Bcl.AsyncInterfaces.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Microsoft.CodeAnalysis.dll
@@ -28,6 +30,7 @@
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Microsoft.Win32.SystemEvents.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Mono.TextTemplating.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/MySqlConnector.dll
+/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Newtonsoft.Json.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Pomelo.EntityFrameworkCore.MySql.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/System.CodeDom.dll
 /Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/System.Composition.AttributedModel.dll
@@ -100,6 +103,7 @@
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.MvcApplicationPartsAssemblyInfo.cache
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.RazorAssemblyInfo.cache
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.RazorAssemblyInfo.cs
+/Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.sourcelink.json
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/staticwebassets.build.json
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/staticwebassets.development.json
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/staticwebassets/msbuild.LogisticsRoutePlanner.Microsoft.AspNetCore.StaticWebAssets.props
@@ -116,7 +120,3 @@
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.pdb
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.genruntimeconfig.cache
 /Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/ref/LogisticsRoutePlanner.dll
-/Users/tzuchin/LogisticsRoutePlanner/obj/Debug/net8.0/LogisticsRoutePlanner.sourcelink.json
-/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/GoogleMaps.LocationServices.dll
-/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/GoogleMapsApi.dll
-/Users/tzuchin/LogisticsRoutePlanner/bin/Debug/net8.0/Newtonsoft.Json.dll

@@ -13,17 +13,18 @@ public class ReportsController : Controller
         _context = context;
     }
 
+    // 報表查詢主畫面，支援條件查詢、分頁
     public async Task<IActionResult> Index(string month, string status, string customer, int page = 1)
     {
-        // 參數初始化
         int pageSize = 10;
-        page = page < 1 ? 1 : page; // 確保頁數不小於1
+        page = page < 1 ? 1 : page;
 
-        // 月份處理
+        // 預設查詢當月
         if (string.IsNullOrEmpty(month))
             month = DateTime.Now.ToString("yyyy-MM");
 
-        if (!DateTime.TryParseExact($"{month}-01", "yyyy-MM-dd", null, 
+        // 將 yyyy-MM 格式轉成 DateTime 作為查詢起始日
+        if (!DateTime.TryParseExact($"{month}-01", "yyyy-MM-dd", null,
             System.Globalization.DateTimeStyles.None, out var startDate))
         {
             return View(new List<Shipment>());
@@ -31,12 +32,12 @@ public class ReportsController : Controller
 
         var endDate = startDate.AddMonths(1);
 
-        // 基礎查詢
+        // 查詢起始日到下個月之前的出貨資料，含目的地資料
         var query = _context.Shipments
             .Include(s => s.Destinations)
             .Where(s => s.ShipmentDate >= startDate && s.ShipmentDate < endDate);
 
-        // 狀態過濾
+        // 若有選擇配送狀態，則過濾目的地並只取對應狀態的
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<DeliveryStatus>(status, out var parsedStatus))
         {
             query = query
@@ -51,25 +52,27 @@ public class ReportsController : Controller
                 });
         }
 
-        // 客戶過濾（如果啟用）
+        // 若有輸入客戶名稱，模糊搜尋
         if (!string.IsNullOrEmpty(customer))
         {
-            query = query.Where(s => s.Destinations.Any(d => 
+            query = query.Where(s => s.Destinations.Any(d =>
                 d.CustomerName.Contains(customer)));
         }
 
-        // 分頁處理
+        // 計算分頁資訊
         var totalRecords = await query.CountAsync();
         var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-        page = Math.Min(page, totalPages); // 確保不超過總頁數
+        totalPages = totalPages < 1 ? 1 : totalPages;
+        page = Math.Min(page, totalPages);
 
+        // 分頁取資料
         var shipments = await query
             .OrderByDescending(s => s.ShipmentDate)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        // 傳遞參數到視圖
+        // 傳遞查詢參數與頁面資訊至 View
         ViewData["Month"] = month;
         ViewData["Status"] = status;
         ViewData["Customer"] = customer;
@@ -81,8 +84,7 @@ public class ReportsController : Controller
         return View(shipments);
     }
 
-
-    // 匯出excel功能
+    // 匯出當月配送報表成 Excel 檔案
     public async Task<IActionResult> ExportExcel(string month)
     {
         DateTime startDate, endDate;
@@ -104,11 +106,14 @@ public class ReportsController : Controller
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("Shipment Report");
+
+                // 設定標題欄
                 worksheet.Cells[1, 1].Value = "客戶名稱";
                 worksheet.Cells[1, 2].Value = "地址";
                 worksheet.Cells[1, 3].Value = "狀態";
                 worksheet.Cells[1, 4].Value = "跳過原因";
 
+                // 將目的地資料逐列寫入
                 int row = 2;
                 foreach (var shipment in shipments)
                 {
@@ -122,6 +127,7 @@ public class ReportsController : Controller
                     }
                 }
 
+                // 建立下載串流
                 var stream = new MemoryStream();
                 package.SaveAs(stream);
                 stream.Position = 0;
@@ -134,8 +140,7 @@ public class ReportsController : Controller
         return View(new List<Shipment>());
     }
 
-
-    // 報表頁面中，刪除按鈕功能
+    // 報表頁面中刪除單一目的地（AJAX 呼叫）
     [HttpDelete]
     [ValidateAntiForgeryToken]
     public IActionResult DeleteDestination(int id)
@@ -149,7 +154,4 @@ public class ReportsController : Controller
 
         return Ok();
     }
-
-
-    
 }

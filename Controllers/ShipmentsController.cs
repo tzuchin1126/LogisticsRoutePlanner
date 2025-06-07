@@ -4,28 +4,24 @@ using LogisticsRoutePlanner.Data;
 using LogisticsRoutePlanner.Models;
 using LogisticsRoutePlanner.Helpers;
 using LogisticsRoutePlanner.Models.ViewModels;
+using LogisticsRoutePlanner.Services;
 
 namespace LogisticsRoutePlanner.Controllers
 {
-    /// 配送任務管理控制器
     public class ShipmentsController : Controller
     {
         private readonly LogisticsDbContext _context;
+        private readonly GoogleMapsRouteService _googleMapsService;
 
-        // 建構子，依賴注入資料庫上下文
-        public ShipmentsController(LogisticsDbContext context)
+        // 建構子注入資料庫與 Google Maps 路徑服務
+        public ShipmentsController(LogisticsDbContext context, GoogleMapsRouteService googleMapsService)
         {
             _context = context;
+            _googleMapsService = googleMapsService; 
         }
 
-        /// 顯示所有配送任務列表
-        // public async Task<IActionResult> Index()
-        // {
-        //     var shipments = await _context.Shipments.ToListAsync();
-        //     return View(shipments);
-        // }
-        
-        /// 顯示分頁的配送任務列表
+
+        // 顯示分頁的配送任務列表
         public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
         {
             // 計算總記錄數
@@ -50,43 +46,39 @@ namespace LogisticsRoutePlanner.Controllers
             return View(shipments);
         }
 
-        /// 顯示新增配送任務表單
+        // 顯示新增配送任務表單
         public IActionResult Create()
         {
             var shipment = new Shipment
             {
-                ShipmentDate = DateTime.Today
+                ShipmentDate = DateTime.Today // 預設為今天
             };
             return View(shipment);
         }
 
 
-        /// 處理新增配送任務表單提交
+        // 處理新增配送任務表單提交
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Shipment shipment)
         {
             if (ModelState.IsValid)
             {
-                // 處理表單資料，儲存到資料庫
+                // 儲存到資料庫
                 _context.Shipments.Add(shipment);
                 _context.SaveChanges();
 
                 TempData["SuccessMessage"] = "配送任務已成功創建！";
 
-                // 重定向回 Create 頁面，這樣就會顯示訊息
-                return RedirectToAction("Create");
+                return RedirectToAction("Create"); // 導回同頁以顯示訊息
             }
-
-            // 如果驗證失敗，返回 Create 頁面並顯示錯誤訊息
-            return View(shipment);
+            return View(shipment); // 驗證失敗時回傳原表單
         }
 
 
-        /// 顯示配送任務詳情
+        // 顯示配送任務詳情
         public async Task<IActionResult> Details(int? id)
         {
-            // 檢查ID是否有效
             if (id == null || id == 0)
                 return NotFound();
 
@@ -101,7 +93,8 @@ namespace LogisticsRoutePlanner.Controllers
             return View(shipment);
         }
         
-        // 新增配送目的地
+
+        // 新增配送目的地   
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddDestination(AddDestinationViewModel model)
@@ -167,10 +160,11 @@ namespace LogisticsRoutePlanner.Controllers
 
             TempData["SuccessMessage"] = "成功新增客戶地點";
             return RedirectToAction("Details", new { id = model.ShipmentId });
-
         }
 
 
+
+        /// 刪除配送目的地（前端使用 AJAX 呼叫）
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteDestination(int id)
@@ -187,7 +181,7 @@ namespace LogisticsRoutePlanner.Controllers
             _context.ShipmentDestinations.Remove(destination);
             _context.SaveChanges();
             
-            // 獲取剩餘目的地
+            // 查詢剩下的目的地並回傳
             var remainingDestinations = _context.ShipmentDestinations
                 .Where(d => d.ShipmentId == destination.ShipmentId)
                 .ToList();
@@ -200,6 +194,8 @@ namespace LogisticsRoutePlanner.Controllers
             });
         }
 
+
+        /// 測試用 API，確認路由是否正確連接 Controller
         [HttpGet]
         public IActionResult TestRoute()
         {
@@ -223,7 +219,7 @@ namespace LogisticsRoutePlanner.Controllers
 
         // 接收前端的 POST 請求來刪除指定的出貨任務（Shipment）
         [HttpPost]
-        [ValidateAntiForgeryToken] // 驗證防偽 Token，防止 CSRF 攻擊
+        [ValidateAntiForgeryToken] 
         public async Task<IActionResult> Delete(int id)
         {
              // 根據傳入的 id 從資料庫中查詢對應的 Shipment 資料
@@ -258,138 +254,72 @@ namespace LogisticsRoutePlanner.Controllers
             return Json(new { success = true, message = "跳過原因已更新" });
         }
 
-        /// 優化配送路線順序
+     
+        /// 使用 Google Maps API 優化配送路線順序
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OptimizeRoute(int id)
         {
-            var shipment = await _context.Shipments
-                .Include(s => s.Destinations)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
-            if (shipment == null)
+            try
             {
-                TempData["ErrorMessage"] = "找不到配送任務";
-                return RedirectToAction("Index");
-            }
+                var shipment = await _context.Shipments
+                    .Include(s => s.Destinations)
+                    .FirstOrDefaultAsync(s => s.Id == id);
 
-            // 確保至少有一個目的地
-            if (!shipment.Destinations.Any())
-            {
-                TempData["ErrorMessage"] = "沒有配送目的地可供優化";
-                return RedirectToAction("Details", new { id });
-            }
+                if (shipment == null)
+                    return Json(new { success = false, message = "找不到配送任務" });
 
-            // 獲取出貨地點的經緯度
-            var originGeo = await GeocodingHelper.GetLatLonAsync(shipment.OriginAddress);
-            if (originGeo == null)
-            {
-                TempData["ErrorMessage"] = "無法獲取出貨地點的地理座標";
-                return RedirectToAction("Details", new { id });
-            }
+                // 確保至少有一個目的地
+                if (!shipment.Destinations.Any())
+                    return Json(new { success = false, message = "沒有配送目的地可供優化" });
 
-            // 記錄起點信息
-            Console.WriteLine($"起點地址: {shipment.OriginAddress}, 經度: {originGeo.Value.lon}, 緯度: {originGeo.Value.lat}");
+                // 使用 Google Maps 服務進行路線優化
+                var optimizedDestinations = await _googleMapsService.OptimizeRouteAsync(
+                    shipment.OriginAddress, 
+                    shipment.Destinations.ToList()
+                );
 
-            var startPoint = new { Lat = originGeo.Value.lat, Lon = originGeo.Value.lon };
-            var currentPoint = startPoint;
-            var destinations = shipment.Destinations.ToList();
-            
-            // 檢查目的地的經緯度，如果為0或null則嘗試獲取
-            foreach (var dest in destinations.Where(d => d.Latitude == 0 && d.Longitude == 0))
-            {
-                var geo = await GeocodingHelper.GetLatLonAsync(dest.Address);
-                if (geo != null)
+                // 更新資料庫中的排序順序
+                foreach (var optimized in optimizedDestinations)
                 {
-                    dest.Latitude = geo.Value.lat;
-                    dest.Longitude = geo.Value.lon;
-                    Console.WriteLine($"更新目的地經緯度: {dest.Address}, 經度: {geo.Value.lon}, 緯度: {geo.Value.lat}");
+                    var destination = shipment.Destinations.FirstOrDefault(d => d.Id == optimized.Id);
+                    if (destination != null)
+                        destination.SortOrder = optimized.SortOrder;
                 }
-                else
+
+                _context.ShipmentDestinations.UpdateRange(shipment.Destinations);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine("Google Maps 優化後的路線順序:");
+                foreach (var dest in optimizedDestinations)
                 {
-                    // 如果無法取得經緯度，則記錄錯誤並通知使用者
-                    TempData["WarningMessage"] = $"目的地 {dest.Address} 無法獲取經緯度。";
-                    Console.WriteLine($"警告: 無法獲取目的地經緯度: {dest.Address}");
+                    Console.WriteLine($"{dest.SortOrder}. {dest.Address} - 距離: {dest.Distance}, 時間: {dest.Duration}");
                 }
+
+                return Json(new { 
+                    success = true,
+                    message = "送貨順序已使用 Google Maps 優化",
+                    optimizedDestinations = optimizedDestinations.Select(d => new {
+                        id = d.Id,
+                        sortOrder = d.SortOrder,
+                        customerName = d.CustomerName,
+                        address = d.Address,
+                        productInfo = d.ProductInfo,
+                        note = d.Note,
+                        skipReason = d.SkipReason,
+                        distance = d.Distance,
+                        duration = d.Duration
+                    }).ToList()
+                });
             }
-
-            var sortedDestinations = new List<ShipmentDestination>();
-
-            // 貪婪算法：每次找最近的點
-            int order = 1;
-            while (destinations.Any())
+            catch (Exception ex)
             {
-                // 找到距離當前點最近的下一個點
-                var nearestDestination = destinations
-                    .Select(d => new { 
-                        Destination = d, 
-                        Distance = CalculateDistance(currentPoint.Lat, currentPoint.Lon, d.Latitude, d.Longitude) 
-                    })
-                    .OrderBy(x => x.Distance)
-                    .First();
-                
-                // 記錄選擇的最近點和距離
-                Console.WriteLine($"選擇目的地: {nearestDestination.Destination.Address}, 距離: {nearestDestination.Distance:F2}公里");
-                
-                nearestDestination.Destination.SortOrder = order++;
-                sortedDestinations.Add(nearestDestination.Destination);
-                destinations.Remove(nearestDestination.Destination);
-                
-                // 更新當前點
-                currentPoint = new { Lat = nearestDestination.Destination.Latitude, Lon = nearestDestination.Destination.Longitude };
+                Console.WriteLine($"路線優化錯誤: {ex.Message}");
+                return Json(new { 
+                    success = false, 
+                    message = $"路線優化失敗: {ex.Message}" 
+                });
             }
-
-            Console.WriteLine("優化後的路線順序:");
-            // 依照最佳路線順序，重新賦值 SortOrder
-            for (int i = 0; i < sortedDestinations.Count; i++)
-            {
-                sortedDestinations[i].SortOrder = i + 1;  // 設置排序值
-                Console.WriteLine($"{sortedDestinations[i].SortOrder}. {sortedDestinations[i].Address}");
-            }
-
-            // 儲存到資料庫
-            _context.ShipmentDestinations.UpdateRange(sortedDestinations);
-            await _context.SaveChangesAsync();
-
-            
-            TempData["SuccessMessage"] = "送貨順序已優化";
-            // return RedirectToAction("Details", new { id });
-
-            // 返回 JSON 而非重定向
-            return Json(new { 
-                success = true,
-                message = "送貨順序已優化",
-                optimizedDestinations = sortedDestinations.Select(d => new {
-                    id = d.Id,
-                    sortOrder = d.SortOrder, //排序順序
-                    customerName = d.CustomerName, //收貨人
-                    address = d.Address, //地址
-                    productInfo = d.ProductInfo, //產品資訊
-                    note = d.Note, //備註
-                    skipReason = d.SkipReason //跳過原因
-                }).ToList()
-            });
-                
-        }
-
-        // 使用 Haversine 公式計算兩點間的距離
-        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
-        {
-            const double R = 6371; // 地球半徑（公里）
-            var dLat = ToRadians(lat2 - lat1);
-            var dLon = ToRadians(lon2 - lon1);
-            
-            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                    Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
-                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
-                    
-            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            return R * c;
-        }
-
-        private double ToRadians(double degrees)
-        {
-            return degrees * (Math.PI / 180);
         }
 
         /// 更新配送狀態
@@ -423,7 +353,6 @@ namespace LogisticsRoutePlanner.Controllers
 
 
         /// 預覽 Excel 檔案
-        /// 這個方法會讀取上傳的 Excel 檔案，並將第一行的標題列出來供使用者選擇對應的欄位。
         [HttpPost]
         public async Task<IActionResult> PreviewExcel(int shipmentId, IFormFile file, string productInfo, string note)
         {
@@ -482,24 +411,22 @@ namespace LogisticsRoutePlanner.Controllers
             // 1. 查詢貨運批次資料（包含目的地清單）
             var shipment = await _context.Shipments.Include(s => s.Destinations)
                 .FirstOrDefaultAsync(s => s.Id == shipmentId);
-            if (shipment == null) // 若找不到貨運批次則返回404
+            if (shipment == null) 
                 return NotFound();
 
             // 2. 處理Excel檔案
             var bytes = Convert.FromBase64String(base64); // 將Base64轉為byte陣列
             using var stream = new MemoryStream(bytes); // 建立記憶體流
             using var package = new OfficeOpenXml.ExcelPackage(stream); // 使用EPPlus套件讀取Excel
-            var sheet = package.Workbook.Worksheets.First(); // 取得第一個工作表
+            var sheet = package.Workbook.Worksheets.First(); 
 
-            // 3. 建立欄位名稱對照表（第一列為標題列）
             var columns = new Dictionary<string, int>();
             for (int col = 1; col <= sheet.Dimension.Columns; col++)
             {
-                var title = sheet.Cells[1, col].Text.Trim(); // 取得欄位標題
-                columns[title] = col; // 記錄欄位名稱與索引的對應關係
+                var title = sheet.Cells[1, col].Text.Trim(); 
+                columns[title] = col; 
             }
 
-            // 4. 逐行讀取資料（從第二列開始）
             for (int row = 2; row <= sheet.Dimension.Rows; row++)
             {
                 var dest = new ShipmentDestination
@@ -512,7 +439,6 @@ namespace LogisticsRoutePlanner.Controllers
                     Note = string.IsNullOrWhiteSpace(noteColumn) ? null : sheet.Cells[row, columns[noteColumn]].Text.Trim()
                 };
 
-                // 5. 地理編碼（將地址轉為經緯度）
                 var geo = await GeocodingHelper.GetLatLonAsync(dest.Address);
                 if (geo != null) // 若成功取得經緯度
                 {
@@ -520,13 +446,13 @@ namespace LogisticsRoutePlanner.Controllers
                     dest.Longitude = geo.Value.lon; // 設定經度
                 }
 
-                // 6. 加入資料庫上下文
                 _context.ShipmentDestinations.Add(dest);
             }
-            // 7. 儲存所有變更到資料庫
             await _context.SaveChangesAsync();
-            // 8. 導向貨運批次詳細頁面
             return RedirectToAction("Details", new { id = shipmentId });
         }
+
+
+        
     }
 }

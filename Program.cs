@@ -1,5 +1,6 @@
 using LogisticsRoutePlanner.Data;
 using LogisticsRoutePlanner.Helpers;
+using LogisticsRoutePlanner.Services;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 
@@ -23,6 +24,15 @@ builder.Services.AddControllersWithViews()
 // 初始化 Geocoding
 GeocodingHelper.Initialize(builder.Configuration);
 
+
+
+
+// 註冊 HttpClient
+builder.Services.AddHttpClient();
+
+// 註冊 Google Maps 路線優化服務
+builder.Services.AddScoped<GoogleMapsRouteService>();
+
 var app = builder.Build();
 
 // 管線設定
@@ -43,3 +53,5 @@ app.MapControllerRoute(
     pattern: "{controller=Shipments}/{action=Index}/{id?}");
 
 app.Run();
+
+

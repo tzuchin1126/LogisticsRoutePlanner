@@ -1,4 +1,5 @@
 {
+    "cSpell.enabled": false,
     "cSpell.words": [
         "beforeend",
         "Geocoder",
@@ -6,6 +7,7 @@
         "jquery",
         "laquo",
         "nowrap",
+        "onmouseover",
         "raquo",
         "stylesheet"
     ]
