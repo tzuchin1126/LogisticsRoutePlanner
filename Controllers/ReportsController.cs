@@ -84,7 +84,19 @@ public class ReportsController : Controller
         return View(shipments);
     }
 
-    // 匯出當月配送報表成 Excel 檔案
+    // 狀態轉中文的對應方法
+    private string ConvertStatusToChinese(DeliveryStatus status)
+    {
+        return status switch
+        {
+            DeliveryStatus.Pending => "待送達",
+            DeliveryStatus.Delivered => "已送達",
+            DeliveryStatus.Skipped => "跳過",
+            _ => status.ToString()
+        };
+    }
+
+    // 匯出 Excel 時用轉換後的中文
     public async Task<IActionResult> ExportExcel(string month)
     {
         DateTime startDate, endDate;
@@ -107,13 +119,12 @@ public class ReportsController : Controller
             {
                 var worksheet = package.Workbook.Worksheets.Add("Shipment Report");
 
-                // 設定標題欄
+                // 標題
                 worksheet.Cells[1, 1].Value = "客戶名稱";
                 worksheet.Cells[1, 2].Value = "地址";
                 worksheet.Cells[1, 3].Value = "狀態";
                 worksheet.Cells[1, 4].Value = "跳過原因";
 
-                // 將目的地資料逐列寫入
                 int row = 2;
                 foreach (var shipment in shipments)
                 {
@@ -121,13 +132,12 @@ public class ReportsController : Controller
                     {
                         worksheet.Cells[row, 1].Value = dest.CustomerName;
                         worksheet.Cells[row, 2].Value = dest.Address;
-                        worksheet.Cells[row, 3].Value = dest.Status;
+                        worksheet.Cells[row, 3].Value = ConvertStatusToChinese(dest.Status); // 這裡轉成中文
                         worksheet.Cells[row, 4].Value = dest.SkipReason;
                         row++;
                     }
                 }
 
-                // 建立下載串流
                 var stream = new MemoryStream();
                 package.SaveAs(stream);
                 stream.Position = 0;
